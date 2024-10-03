@@ -12,5 +12,5 @@ Dự án này là một website quản lý công việc (Workflow Management) ch
 - **Front-end**: HTML, CSS, JavaScript (Framework: ReactJS)
 - **Back-end**: Java
 - **Cơ sở dữ liệu**: MongoDB/MySQL
-- **Giao tiếp mạng**: WebSocket/HTTP REST API
+- **Giao tiếp mạng**: gRPC, WebSocket, RestfulAPI
 - **Kiến trúc**: Client-Server
