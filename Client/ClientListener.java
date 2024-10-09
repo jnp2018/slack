@@ -1,4 +1,4 @@
-package slack;
+package Client;
 
 import java.io.*;
 import java.net.*;

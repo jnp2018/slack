@@ -1,4 +1,4 @@
-package slack;
+package Server;
 
 public class ServerLauncher {
 	public static void main(String[] args) {
