@@ -25,7 +25,7 @@ Một ứng dụng không gian làm việc hợp tác cho phép nhiều người
 ## 🚀 Bắt đầu
 Clone repo:
 ```bash
-git clone https://github.com/tennguoidung/repo-cua-ban.git
+git clone https://github.com/ciguliaz/slack.git
 ```
 
 Cài đặt các thư viện:
