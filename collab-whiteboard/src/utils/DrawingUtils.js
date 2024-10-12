@@ -9,7 +9,7 @@ export const drawLine = (context, x0, y0, x1, y1, color, lineWidth) => {
   context.closePath();
 };
 
-export const draw = (e, canvasRef, isDrawing, color, lineWidth, socket) => {
+export const draw = (e, canvasRef, isDrawing, color, lineWidth, socket, lastPos, setLastPos) => {
   if (!isDrawing) return;
 
   const canvas = canvasRef.current;
@@ -20,19 +20,28 @@ export const draw = (e, canvasRef, isDrawing, color, lineWidth, socket) => {
 
   context.strokeStyle = color;
   context.lineWidth = lineWidth;
-	context.lineCap = 'round';
-	
+  context.lineCap = 'round';
+
   context.lineTo(x, y);
   context.stroke();
   context.beginPath();
   context.moveTo(x, y);
 
-  socket.emit('drawing', {
-    x0: x,
-    y0: y,
-    x1: x,
-    y1: y,
-    color: color,
-    lineWidth: lineWidth
-  });
+  // Only draw if there is a previous position
+  if (lastPos) {
+    drawLine(context, lastPos.x, lastPos.y, x, y, color, lineWidth);
+
+    // Emit the drawing data with the previous position
+    socket.emit('drawing', {
+      x0: lastPos.x,
+      y0: lastPos.y,
+      x1: x,
+      y1: y,
+      color: color,
+      lineWidth: lineWidth
+    });
+  }
+
+  // Update the last position to the current position
+  setLastPos({ x, y });
 };
