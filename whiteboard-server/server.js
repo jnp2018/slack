@@ -13,9 +13,12 @@ const io = socketIo(server, {
 
 io.on('connection', (socket) => {
   console.log('New client connected');
-  
-  socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
-  
+
+  socket.on('drawing', (data) => {
+    // Broadcast the entire data object, including the points
+    socket.broadcast.emit('drawing', data);
+  });
+
   socket.on('disconnect', () => console.log('Client disconnected'));
 });
 
