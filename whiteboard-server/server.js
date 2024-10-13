@@ -23,10 +23,17 @@ io.on('connection', (socket) => {
   socket.on('drawing', (data) => {
     // Save the drawing data to the history
     whiteboardData.push(data);
-    
+
     // Broadcast the entire data object, including the points
     socket.broadcast.emit('drawing', data);
   });
+
+  // Listen for the clearCanvas event and broadcast it to all users
+  socket.on('clearCanvas', () => {
+    whiteboardData = [];
+    socket.broadcast.emit('clearCanvas');
+  });
+
 
   socket.on('disconnect', () => console.log('Client disconnected'));
 });
