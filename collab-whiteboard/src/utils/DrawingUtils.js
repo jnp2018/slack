@@ -5,6 +5,7 @@ export const drawLine = (context, x0, y0, x1, y1, color, lineWidth) => {
   context.lineTo(x1, y1);
   context.strokeStyle = color;
   context.lineWidth = lineWidth;
+  context.lineCap = 'round';
   context.stroke();
   context.closePath();
 };
