@@ -18,10 +18,19 @@ function Whiteboard() {
 		const canvas = canvasRef.current;
 		const context = canvas.getContext('2d');
 
+		// Listen for incoming drawing data from other users
 		socket.on('drawing', onDrawingEvent);
+		
+		// Listen for the shape history from the server when a new user connects
+		socket.on('history', (shapes) => {
+      shapes.forEach((shape) => {
+        drawLine(context, shape.x0, shape.y0, shape.x1, shape.y1, shape.color, shape.lineWidth);
+      });
+    });
 
 		return () => {
 			socket.off('drawing', onDrawingEvent);
+			socket.off('history');
 		};
 	}, []);
 

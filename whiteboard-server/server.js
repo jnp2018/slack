@@ -11,10 +11,19 @@ const io = socketIo(server, {
   }
 });
 
+// Prepare for all drawing data saved
+let whiteboardData = [];
+
 io.on('connection', (socket) => {
   console.log('New client connected');
 
+  // Send the shape history to the newly connected client
+  socket.emit('history', whiteboardData);
+
   socket.on('drawing', (data) => {
+    // Save the drawing data to the history
+    whiteboardData.push(data);
+    
     // Broadcast the entire data object, including the points
     socket.broadcast.emit('drawing', data);
   });
