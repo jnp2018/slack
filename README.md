@@ -15,12 +15,13 @@ Một ứng dụng không gian làm việc hợp tác cho phép nhiều người
 - Nhiều tính năng khác: Hãy theo dõi để nhận thêm nhiều tính năng hấp dẫn!
 ## 📁 Cấu trúc dự án
 ```bash
-├── docs/                 # Tài liệu dự án
-├── src/                  # Mã nguồn của ứng dụng
-├── assets/               # Hình ảnh, biểu tượng và các tài nguyên khác
-├── tests/                # Các bài kiểm thử của ứng dụng
-├── README.md             # Bạn đang ở đây!
-└── LICENSE               # Thông tin bản quyền
+├── docs/                        # Tài liệu dự án
+├── collab-whiteboard/
+│   └── src/                     # Mã nguồn của ứng dụng
+├── assets/                      # Hình ảnh, biểu tượng và các tài nguyên khác
+├── tests/                       # Các bài kiểm thử của ứng dụng
+├── README.md                    # Bạn đang ở đây!
+└── LICENSE                      # Thông tin bản quyền
 ```
 ## 🚀 Bắt đầu
 Clone repo:

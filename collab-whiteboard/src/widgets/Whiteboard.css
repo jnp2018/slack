@@ -1,0 +1,11 @@
+/* src/components/Whiteboard.css */
+.whiteboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+canvas {
+  border: 1px solid #ccc;
+}
