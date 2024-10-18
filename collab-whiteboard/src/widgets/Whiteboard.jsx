@@ -6,7 +6,7 @@ import { draw, drawPolyline } from '../utils/DrawingUtils';
 import './Whiteboard.css';
 
 const socket =
-	io('whiteboard-server');
+	io('whiteboard-server.railway.internal');
 
 function Whiteboard() {
 	const canvasRef = useRef(null);
