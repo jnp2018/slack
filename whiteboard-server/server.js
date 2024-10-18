@@ -13,9 +13,12 @@ const io = socketIo(server, {
 
 // Prepare for all drawing data saved
 let whiteboardData = [];
+let currentClient = 0;
+let peakClient = 0;
 
 io.on('connection', (socket) => {
-  console.log('New client connected');
+  currentClient += 1;
+  console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
 
   // Send the shape history to the newly connected client
   socket.emit('history', whiteboardData);
@@ -35,7 +38,10 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on('disconnect', () => console.log('Client disconnected'));
+  socket.on('disconnect', () => {
+    currentClient -= 1;
+    console.log(`[ - ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
+  });
 });
 
 const PORT = 4000;
