@@ -5,6 +5,10 @@ import ToolBar from './ToolBar';
 import { draw, drawPolyline } from '../utils/DrawingUtils';
 import './Whiteboard.css';
 
+//TODO: try to change this http connection with Railway internal connection
+//whiteboard-server.railway.internal
+//whiteboard-server
+
 const socket =
 	io('https://whiteboard-server.up.railway.app/');
 
