@@ -5,7 +5,8 @@ import ToolBar from './ToolBar';
 import { draw, drawPolyline } from '../utils/DrawingUtils';
 import './Whiteboard.css';
 
-const socket = io('http://localhost:4000');
+const socket =
+	io('https://whiteboard-server.up.railway.app/');
 
 function Whiteboard() {
 	const canvasRef = useRef(null);
