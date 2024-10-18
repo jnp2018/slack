@@ -18,7 +18,7 @@ let peakClient = 0;
 
 io.on('connection', (socket) => {
   currentClient += 1;
-  peakClient = max(peakClient, currentClient);
+  peakClient = peakClient > currentClient ? peakClient : currentClient;
   console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
 
   // Send the shape history to the newly connected client
