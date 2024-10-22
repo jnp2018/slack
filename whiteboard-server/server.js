@@ -6,7 +6,8 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "*",  // Allow requests from any origin
+    origin: "https://collab-whiteboard.up.railway.app/",  // Allow requests from any origin
+    // origin: "*",
     methods: ["GET", "POST"]
   }
 });
