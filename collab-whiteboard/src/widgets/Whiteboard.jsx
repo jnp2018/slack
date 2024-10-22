@@ -11,6 +11,8 @@ import './Whiteboard.css';
 
 const socket =
 	io('https://whiteboard-server.up.railway.app/');
+	// io('localhost:4000/');
+
 
 function Whiteboard() {
 	const canvasRef = useRef(null);
