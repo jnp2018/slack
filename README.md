@@ -43,7 +43,8 @@ npm start
 - Backend: Node.js, Express
 - Cơ sở dữ liệu: MongoDB
 - WebSocket: Giao tiếp thời gian thực
-Link FE: https://client-repo-production.up.railway.app/
-Link BE: https://server-repo-production-0508.up.railway.app/
 ## 📢 Đóng góp
 Chúng tôi hoan nghênh các đóng góp! Hãy thoải mái gửi các vấn đề, yêu cầu pull, hoặc gợi ý để giúp dự án này tốt hơn.
+
+- Link FE: https://client-repo-production.up.railway.app/
+- Link BE: https://server-repo-production-0508.up.railway.app/
