@@ -22,7 +22,13 @@ io.on('connection', (socket) => {
   currentClient += 1;
   peakClient = peakClient > currentClient ? peakClient : currentClient;
   console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
- 
+ //Handle Login
+ socket.on("userJoined",(data)=>{
+  const {name, userId, roomId, host, presenter}=data;
+  socket.join(roomId);
+  socket.emit("userIsJoined",{success:true});
+});
+//
   // Send the shape history to the newly connected client
   socket.emit('history', whiteboardData);
 
