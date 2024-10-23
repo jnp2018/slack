@@ -18,6 +18,16 @@ const CreateRoomForm=({uuid, socket, setUser})=>{
         console.log(roomData);
         socket.emit("userJoined", roomData);
     }
+    function copyText() {
+        const roomIdElement = document.getElementById('roomId'); // Lấy phần tử input có id "roomId"
+        if (roomIdElement) {
+          const textToCopy = roomIdElement.value; // Lấy giá trị của input
+    
+          if (textToCopy) {
+            navigator.clipboard.writeText(textToCopy);
+        } 
+      }
+    }
    return (
      <form className="form col-md-12 mt-5">
       <div className="form-group">
@@ -31,7 +41,8 @@ const CreateRoomForm=({uuid, socket, setUser})=>{
       <div className="form-group border">
              
          <div className="input-group d-flex gap-1 align-items-center justify-content-center">
-            <input type="text"
+            <input  id="roomId" 
+             type="text"
               value={roomId}
             className="form-control my-2 border-0"
             disabled 
@@ -44,7 +55,8 @@ const CreateRoomForm=({uuid, socket, setUser})=>{
                   generate        
                </button>
                <button className="btn btn-outline-danger btn-sm me-2" 
-               type="button">
+               onClick={copyText}
+              type="button">
                   copy
                </button>
              
