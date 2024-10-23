@@ -11,7 +11,6 @@ Một ứng dụng không gian làm việc hợp tác cho phép nhiều người
 - Bảng vẽ trắng: Vẽ và hợp tác thời gian thực để phát triển ý tưởng.
 - Hộp chat: Giao tiếp tức thì với đội nhóm trong suốt phiên làm việc.
 - Công cụ phát triển: Đa dạng các tiện ích giúp bạn biến ý tưởng thành hiện thực.
-- Chia sẻ màn hình: Chia sẻ màn hình của bạn với đồng đội để hợp tác liền mạch.
 - Nhiều tính năng khác: Hãy theo dõi để nhận thêm nhiều tính năng hấp dẫn!
 ## 📁 Cấu trúc dự án
 ```bash
@@ -44,5 +43,7 @@ npm start
 - Backend: Node.js, Express
 - Cơ sở dữ liệu: MongoDB
 - WebSocket: Giao tiếp thời gian thực
+Link FE: https://client-repo-production.up.railway.app/
+Link BE: https://server-repo-production-0508.up.railway.app/
 ## 📢 Đóng góp
 Chúng tôi hoan nghênh các đóng góp! Hãy thoải mái gửi các vấn đề, yêu cầu pull, hoặc gợi ý để giúp dự án này tốt hơn.
