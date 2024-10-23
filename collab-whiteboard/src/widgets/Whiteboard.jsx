@@ -9,12 +9,10 @@ import './Whiteboard.css';
 //whiteboard-server.railway.internal
 //whiteboard-server
 
-const socket =
-	io('https://whiteboard-server.up.railway.app/');
-	// io('localhost:4000/');
 
 
-function Whiteboard() {
+
+function Whiteboard({socket}) {
 	const canvasRef = useRef(null);
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [color, setColor] = useState('#000000');
