@@ -5,9 +5,14 @@ import ToolBar from './ToolBar';
 import { draw, drawPolyline } from '../utils/DrawingUtils';
 import './Whiteboard.css';
 
-const socket = io('http://localhost:4000');
+//TODO: try to change this http connection with Railway internal connection
+//whiteboard-server.railway.internal
+//whiteboard-server
 
-function Whiteboard() {
+
+
+
+function Whiteboard({socket}) {
 	const canvasRef = useRef(null);
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [color, setColor] = useState('#000000');

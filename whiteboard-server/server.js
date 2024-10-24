@@ -6,17 +6,29 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    // origin: ["https://collab-whiteboard.up.railway.app/", "localhost:3000/"],
+    origin: "*", // Allow requests from any origin
     methods: ["GET", "POST"]
   }
 });
 
 // Prepare for all drawing data saved
 let whiteboardData = [];
+let currentClient = 0;
+let peakClient = 0;
 
 io.on('connection', (socket) => {
-  console.log('New client connected');
 
+  currentClient += 1;
+  peakClient = peakClient > currentClient ? peakClient : currentClient;
+  console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
+ //Handle Login
+ socket.on("userJoined",(data)=>{
+  const {name, userId, roomId, host, presenter}=data;
+  socket.join(roomId);
+  socket.emit("userIsJoined",{success:true});
+});
+//
   // Send the shape history to the newly connected client
   socket.emit('history', whiteboardData);
 
@@ -35,7 +47,10 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on('disconnect', () => console.log('Client disconnected'));
+  socket.on('disconnect', () => {
+    currentClient -= 1;
+    console.log(`[ - ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
+  });
 });
 
 const PORT = 4000;
