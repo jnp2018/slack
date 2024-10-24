@@ -22,7 +22,9 @@ Một ứng dụng không gian làm việc hợp tác cho phép nhiều người
 ├── README.md                    # Bạn đang ở đây!
 └── LICENSE                      # Thông tin bản quyền
 ```
+
 ## 🚀 Bắt đầu
+### Local run
 Clone repo:
 ```bash
 git clone https://github.com/ciguliaz/slack.git
@@ -30,21 +32,22 @@ git clone https://github.com/ciguliaz/slack.git
 
 Cài đặt các thư viện:
 ```bash
-npm install
+cd collab-whiteboard && npm install
 ```
 
 Chạy ứng dụng:
 ```bash
-npm start
+cd collab-whiteboard && npm run start
 ```
+### App
+- Link FE: https://client-repo-production.up.railway.app/
+- Link BE: https://server-repo-production-0508.up.railway.app/
+
 
 ## 🛠 Công nghệ sử dụng
 - Frontend: React, Redux, HTML5 Canvas cho bảng vẽ trắng
 - Backend: Node.js, Express
-- Cơ sở dữ liệu: MongoDB
 - WebSocket: Giao tiếp thời gian thực
 ## 📢 Đóng góp
 Chúng tôi hoan nghênh các đóng góp! Hãy thoải mái gửi các vấn đề, yêu cầu pull, hoặc gợi ý để giúp dự án này tốt hơn.
 
-- Link FE: https://client-repo-production.up.railway.app/
-- Link BE: https://server-repo-production-0508.up.railway.app/
