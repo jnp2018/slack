@@ -1,36 +1,46 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
+const WebSocket = require('ws');
+// const socketIo = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    // origin: ["https://collab-whiteboard.up.railway.app/", "localhost:3000/"],
-    origin: "*", // Allow requests from any origin
-    methods: ["GET", "POST"]
-  }
-});
+// const io = socketIo(server, {
+//   cors: {
+//     // origin: ["https://collab-whiteboard.up.railway.app/", "localhost:3000/"],
+//     origin: "*", // Allow requests from any origin
+//     methods: ["GET", "POST"]
+//   }
+// });
+const wss = new WebSocket.Server({ server })
+
+//only client has one of these origin will be able to establish connection to server
+const allowedOrigin = [
+  "https://collab-whiteboard.up.railway.app/",
+  "http://localhost:3000/",
+  "http://localhost:3001/"
+]
 
 // Prepare for all drawing data saved
 let whiteboardData = [];
 let currentClient = 0;
 let peakClient = 0;
 
-io.on('connection', (socket) => {
+wss.on('connection', (ws) => {
 
   currentClient += 1;
   peakClient = peakClient > currentClient ? peakClient : currentClient;
   console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
- //Handle Login
- socket.on("userJoined",(data)=>{
-  const {name, userId, roomId, host, presenter}=data;
-  socket.join(roomId);
-  socket.emit("userIsJoined",{success:true});
-});
-//
+
   // Send the shape history to the newly connected client
   socket.emit('history', whiteboardData);
+
+  //Handle Login
+  socket.on("userJoined", (data) => {
+    const { name, userId, roomId, host, presenter } = data;
+    socket.join(roomId);
+    socket.emit("userIsJoined", { success: true });
+  });
 
   socket.on('drawing', (data) => {
     // Save the drawing data to the history
@@ -47,7 +57,7 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on('disconnect', () => {
+  ws.on('close', () => {
     currentClient -= 1;
     console.log(`[ - ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
   });
