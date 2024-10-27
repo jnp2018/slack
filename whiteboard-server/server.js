@@ -1,10 +1,10 @@
-import express from 'express';
-import { createServer } from 'http';
-import { Server, OPEN } from 'ws';
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
 
 const app = express();
-const server = createServer(app);
-const wss = new Server({ server })
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server })
 
 //only client has one of these origin will be able to establish connection to server
 const allowedOrigin = [
