@@ -1,10 +1,10 @@
-const express = require('express');
-const http = require('http');
-const WebSocket = require('ws');
+import express from 'express';
+import { createServer } from 'http';
+import { Server, OPEN } from 'ws';
 // const socketIo = require('socket.io');
 
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 // const io = socketIo(server, {
 //   cors: {
 //     // origin: ["https://collab-whiteboard.up.railway.app/", "localhost:3000/"],
@@ -12,7 +12,7 @@ const server = http.createServer(app);
 //     methods: ["GET", "POST"]
 //   }
 // });
-const wss = new WebSocket.Server({ server })
+const wss = new Server({ server })
 
 //only client has one of these origin will be able to establish connection to server
 const allowedOrigin = [
@@ -26,14 +26,16 @@ let whiteboardData = [];
 let currentClient = 0;
 let peakClient = 0;
 
+//! Main --------------------------------------------
 wss.on('connection', (ws) => {
 
   currentClient += 1;
   peakClient = peakClient > currentClient ? peakClient : currentClient;
   console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
 
-  // Send the shape history to the newly connected client
-  socket.emit('history', whiteboardData);
+  // New client is sent whiteboard data for sync with others
+  // socket.emit('history', whiteboardData);
+  wsSend(ws, "history", whiteboardData)
 
   //Handle Login
   socket.on("userJoined", (data) => {
@@ -56,6 +58,37 @@ wss.on('connection', (ws) => {
     socket.broadcast.emit('clearCanvas');
   });
 
+  ws.on('message', (message) => {
+    console.log(`Received message =>_${message}_<=`);
+    switch (message.tag) {
+      case 'roomCreateRequest':
+        //TODO: room create request handler
+        break;
+      case 'userJoinRequest':
+        //TODO: user join request
+        break;
+      case 'userJoined':
+        //TODO
+        break;
+      case 'drawing':
+        break;
+      case 'clearCanvas':
+        //TODO
+        break;
+      case 'undo':
+        //TODO
+        break;
+      case 'redo':
+        //TODO
+        break;
+      //TODO: add more case here
+      default:
+        console.log('Unknown message tag:', message.tag);
+        break;
+
+    }
+  })
+
 
   ws.on('close', () => {
     currentClient -= 1;
@@ -65,3 +98,22 @@ wss.on('connection', (ws) => {
 
 const PORT = 4000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+//! Handlers --------------------------------------------
+
+
+
+//! Utilities --------------------------------------------
+//send the message to everyone currently connect to server
+const broadcast = (ws, msg) => {
+  wss.clients.forEach((client) => {
+    if (client.readyState === OPEN) {
+      client.send(JSON.stringify(msg));
+    }
+  });
+}
+
+//basic send function
+const wsSend = (ws, tag, data) => {
+  ws.send(JSON.stringify({ tag: tag, data: data }))
+}
