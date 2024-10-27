@@ -35,18 +35,6 @@ wss.on('connection', (ws, req) => {
   // socket.emit('history', whiteboardData);
   wsSend(ws, "history", whiteboardData)
 
-  //Handle Login
-  socket.on("userJoined", (data) => {
-    const { name, userId, roomId, host, presenter } = data;
-    socket.join(roomId);
-    socket.emit("userIsJoined", { success: true });
-  });
-
-  // Listen for the clearCanvas event and broadcast it to all users
-  socket.on('clearCanvas', () => {
-    whiteboardData = [];
-    socket.broadcast.emit('clearCanvas');
-  });
 
   ws.on('message', (message) => {
     console.log(`Received message =>_${message}_<=`);
@@ -55,7 +43,7 @@ wss.on('connection', (ws, req) => {
         //TODO: room create request handler
         break;
       case 'userJoinRoomRequest':
-        //TODO: user join room request
+        handleUserJoinRequest(ws, message.data)
         break;
       case 'userJoinedRoom':
         //TODO
@@ -90,6 +78,23 @@ const PORT = 4000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 //! Handlers --------------------------------------------
+//Handle Login
+// socket.on("userJoined", (data) => {
+//   const { name, userId, roomId, host, presenter } = data;
+//   socket.join(roomId);
+//   socket.emit("userIsJoined", { success: true });
+// });
+const handleUserJoinRequest = (ws, data) => {
+  const { roomId, userId } = data;
+  
+  //TODO: resolve request logic for accept/reject
+
+  // Default respond: always Accept
+  wsSend(ws, 'userJoinRoomRequestAccepted', {})
+
+
+
+}
 
 const drawingHandler = (ws, data) => {
   // Save the drawing data to the history
