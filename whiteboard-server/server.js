@@ -1,17 +1,9 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server, OPEN } from 'ws';
-// const socketIo = require('socket.io');
 
 const app = express();
 const server = createServer(app);
-// const io = socketIo(server, {
-//   cors: {
-//     // origin: ["https://collab-whiteboard.up.railway.app/", "localhost:3000/"],
-//     origin: "*", // Allow requests from any origin
-//     methods: ["GET", "POST"]
-//   }
-// });
 const wss = new Server({ server })
 
 //only client has one of these origin will be able to establish connection to server
@@ -27,7 +19,13 @@ let currentClient = 0;
 let peakClient = 0;
 
 //! Main --------------------------------------------
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
+
+  // Check if ws origin is allowed to connect
+  if (!allowedOrigin.includes(req.headers.origin)) {
+    wsSend(ws, 'originBlocked', {})
+    ws.close()
+  }
 
   currentClient += 1;
   peakClient = peakClient > currentClient ? peakClient : currentClient;
@@ -44,14 +42,6 @@ wss.on('connection', (ws) => {
     socket.emit("userIsJoined", { success: true });
   });
 
-  socket.on('drawing', (data) => {
-    // Save the drawing data to the history
-    whiteboardData.push(data);
-
-    // Broadcast the entire data object, including the points
-    socket.broadcast.emit('drawing', data);
-  });
-
   // Listen for the clearCanvas event and broadcast it to all users
   socket.on('clearCanvas', () => {
     whiteboardData = [];
@@ -64,16 +54,17 @@ wss.on('connection', (ws) => {
       case 'roomCreateRequest':
         //TODO: room create request handler
         break;
-      case 'userJoinRequest':
-        //TODO: user join request
+      case 'userJoinRoomRequest':
+        //TODO: user join room request
         break;
-      case 'userJoined':
+      case 'userJoinedRoom':
         //TODO
         break;
       case 'drawing':
+        drawingHandler(ws, message.data)
         break;
       case 'clearCanvas':
-        //TODO
+        clearCanvasHandler(ws, message.data)
         break;
       case 'undo':
         //TODO
@@ -89,7 +80,6 @@ wss.on('connection', (ws) => {
     }
   })
 
-
   ws.on('close', () => {
     currentClient -= 1;
     console.log(`[ - ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
@@ -101,14 +91,26 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 //! Handlers --------------------------------------------
 
+const drawingHandler = (ws, data) => {
+  // Save the drawing data to the history
+  whiteboardData.push(data);
+  // Broadcast the entire data object, including the points
+  broadcast(ws, 'drawing', data)
+}
+
+const clearCanvasHandler = (ws, data) => {
+  // Clear the whiteboard data
+  whiteboardData = [];
+  broadcast(ws, 'clearCanvas', data)
+}
 
 
 //! Utilities --------------------------------------------
 //send the message to everyone currently connect to server
-const broadcast = (ws, msg) => {
+const broadcast = (ws, tag, data) => {
   wss.clients.forEach((client) => {
     if (client.readyState === OPEN) {
-      client.send(JSON.stringify(msg));
+      client.send(JSON.stringify({ tag: tag, data: data }));
     }
   });
 }
