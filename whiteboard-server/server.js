@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,6 +15,23 @@ const allowedOrigin = [
 ]
 
 // Prepare for all drawing data saved
+let whiteboardList = [
+  {
+    id: 'f0d82725-9cb9-43df-ae5e-c86c148db92d',
+    whiteboardData: [],
+    name: 'Whiteboard 0',
+    users: [
+      {
+        id: '4674f88b025b4c0d0f90fac016bed637',
+        name: 'User 0',
+        roles: [
+          'admin',
+          'verified'
+        ]
+      }
+    ]
+  }
+]
 let whiteboardData = [];
 let currentClient = 0;
 let peakClient = 0;
@@ -26,6 +44,10 @@ wss.on('connection', (ws, req) => {
     wsSend(ws, 'originBlocked', {})
     ws.close()
   }
+
+  //TODO: handle name
+  wsExtend(ws, generateUserId(), 'no name yet')
+  console.log(ws.id, ws.name)
 
   currentClient += 1;
   peakClient = peakClient > currentClient ? peakClient : currentClient;
@@ -86,17 +108,14 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 // });
 const handleUserJoinRequest = (ws, data) => {
   const { roomId, userId } = data;
-  
+
   if (true) {
     //TODO: resolve request logic for accept/reject at handleUserJoinRequest
-  // Default respond: always Accept
-  wsSend(ws, 'userJoinRoomRequestAccepted', {})
+    // Default respond: always Accept
+    wsSend(ws, 'userJoinRoomRequestAccepted', {})
   } else {
     wsSend(ws, 'userJoinRoomRequestRejected', {})
   }
-  
-
-
 
 }
 
@@ -112,9 +131,35 @@ const clearCanvasHandler = (ws, data) => {
   whiteboardData = [];
   broadcast(ws, 'clearCanvas', data)
 }
+//! WebSocket extender --------------------------------------------
+const wsExtend = (ws, id, name) => {
+  ws.id = id;
+  ws.name = name;
+  ws.assignUserToRoom = (roomId) => {
+    // Add user id to wb memo
+    whiteboardList.find(wb => wb.id === roomId).users.push(ws.id)
+  }
 
+  ws.removeUserFromRoom = (roomId) => {
+    // Remove user id from memo
+    whiteboardList.find(wb => wb.id === roomId).users
+      = whiteboardList.find(wb => wb.id === roomId).users.filter(user => user.id !== ws.id)
+  }
+  //TODO: move broadcast and wsSend here
+  //TODO: add more function here
+  
+}
 
 //! Utilities --------------------------------------------
+
+const generateUserId = () => {
+  return crypto.randomBytes(16).toString('hex'); // Generates a 32-character hex string
+}
+
+const generateRoomId = () => {
+  return crypto.randomUUID(); // Generates a UUID v4-style ID
+}
+
 //send the message to everyone currently connect to server
 const broadcast = (ws, tag, data) => {
   wss.clients.forEach((client) => {
