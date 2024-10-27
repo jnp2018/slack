@@ -46,7 +46,7 @@ wss.on('connection', (ws, req) => {
         handleUserJoinRequest(ws, message.data)
         break;
       case 'userJoinedRoom':
-        //TODO
+        //TODO: user joined room handler
         break;
       case 'drawing':
         drawingHandler(ws, message.data)
@@ -55,10 +55,10 @@ wss.on('connection', (ws, req) => {
         clearCanvasHandler(ws, message.data)
         break;
       case 'undo':
-        //TODO
+        //TODO: undo handler
         break;
       case 'redo':
-        //TODO
+        //TODO: redo handler
         break;
       //TODO: add more case here
       default:
@@ -87,10 +87,14 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 const handleUserJoinRequest = (ws, data) => {
   const { roomId, userId } = data;
   
-  //TODO: resolve request logic for accept/reject
-
+  if (true) {
+    //TODO: resolve request logic for accept/reject at handleUserJoinRequest
   // Default respond: always Accept
   wsSend(ws, 'userJoinRoomRequestAccepted', {})
+  } else {
+    wsSend(ws, 'userJoinRoomRequestRejected', {})
+  }
+  
 
 
 
