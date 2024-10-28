@@ -42,14 +42,14 @@ wss.on('connection', (ws, req) => {
   // TODO: handle origin auth
   if (!allowedOrigin.includes(req.headers.origin)) {
     wsSend(ws, 'originBlocked', {})
-    console.log('this origin is blocked :' +req.headers.origin)
+    console.log('this origin is blocked :' + req.headers.origin)
     ws.close()
   } else {
     console.log('nice origin bro :' + req.headers.origin)
   }
 
   //TODO: handle name
-  wsExtend(ws, generateUserId(), 'no name yet')
+  wsExtend(ws, generateUserId(), 'guest user')
   console.log(ws.id, ws.name)
   currentClient += 1;
   peakClient = peakClient > currentClient ? peakClient : currentClient;
@@ -61,13 +61,18 @@ wss.on('connection', (ws, req) => {
 
 
   ws.on('message', (message) => {
+
     console.log(`Received message =>_${message}_<=`);
+    message = JSON.parse(message)
+    console.log(message)
+    console.log(message.tag)
+    console.log(message.data)
     switch (message.tag) {
-      case 'roomCreateRequest':
-        //TODO: room create request handler
+      case 'createRoomRequest':
+        createRoomRequestHandler(ws, message.data)
         break;
       case 'userJoinRoomRequest':
-        handleUserJoinRequest(ws, message.data)
+        userJoinRoomRequestHandler(ws, message.data)
         break;
       case 'userJoinedRoom':
         //TODO: user joined room handler
@@ -102,20 +107,43 @@ const PORT = 4000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 //! Handlers --------------------------------------------
-//Handle Login
-// socket.on("userJoined", (data) => {
-//   const { name, userId, roomId, host, presenter } = data;
-//   socket.join(roomId);
-//   socket.emit("userIsJoined", { success: true });
-// });
-const handleUserJoinRequest = (ws, data) => {
-  const { roomId, userId } = data;
+
+const createRoomRequestHandler = (ws, data) => {
+  ({ userName, roomId } = data);
+  ws.name = userName;
 
   if (true) {
+    console.log('createRoomRequestAccepted')
+    wsSend(ws, 'createRoomRequestAccepted', {})
+    const newId = generateRoomId();
+    whiteboardList.push({
+      id: newId,
+      whiteboardData: [],
+      users: {
+        id: ws.id,
+        name: ws.name
+      }
+    })
+    console.log(`[ + ] Room created: ${newId}`)
+    userJoinRoomRequestHandler(ws, { userId: ws.id, roomId: roomId }, true)
+  } else {
+    console.log('createRoomRequestRejected')
+    ws.send2('createRoomRequestRejected', {})
+  }
+
+
+}
+
+const userJoinRoomRequestHandler = (ws, data, bypass = false) => {
+  const { userId, roomId } = data;
+
+  if (true || bypass) {
     //TODO: resolve request logic for accept/reject at handleUserJoinRequest
     // Default respond: always Accept
-    wsSend(ws, 'userJoinRoomRequestAccepted', {})
+    console.log('userJoinRoomRequestAccepted')
+    wsSend(ws, 'userJoinRoomRequestAccepted', { roomId })
   } else {
+    console.log('userJoinRoomRequestRejected')
     wsSend(ws, 'userJoinRoomRequestRejected', {})
   }
 
@@ -147,9 +175,23 @@ const wsExtend = (ws, id, name) => {
     whiteboardList.find(wb => wb.id === roomId).users
       = whiteboardList.find(wb => wb.id === roomId).users.filter(user => user.id !== ws.id)
   }
-  //TODO: move broadcast and wsSend here
+
+  //! Not tested
+  ws.send2 = (tag, data) => {
+    ws.send(JSON.stringify({ tag: tag, data: data }))
+  }
+
+  //! Not tested
+  ws.broadcast = (tag, data) => {
+    wss.clients.forEach((client) => {
+      if (client.readyState === OPEN) {
+        client.send(JSON.stringify({ tag: tag, data: data }));
+      }
+    });
+  }
+
   //TODO: add more function here
-  
+
 }
 
 //! Utilities --------------------------------------------
