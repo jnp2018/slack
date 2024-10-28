@@ -12,14 +12,15 @@ function App() {
   const [user, setUser] = useState(null);
   useEffect(() => {
     socket.onmessage = (msg) => {
-      // if (msg.tag == 'userJoinRoomRequestAccepted') {
-      //   console.log('userJoinRoomRequestAccepted')
-      //   //TODO: handle accepted logic
-      // } else {
-      //   console.log('userJoinRoomRequestRejected')
-      //   //TODO: handle rejected logic
-      // }
-    }
+      console.log('Received from server:', msg);
+
+      // Handle other tags or perform actions here if needed
+      if (msg.tag === 'userJoinRoomRequestAccepted') {
+        console.log('userJoinRoomRequestAccepted');
+      } else if (msg.tag === 'userJoinRoomRequestRejected') {
+        console.log('userJoinRoomRequestRejected');
+      }
+    };
   }, []);
   // const uuid = () => {
   //   let S4 = () => {
