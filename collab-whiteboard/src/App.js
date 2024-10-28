@@ -3,11 +3,6 @@ import Whiteboard from './widgets/Whiteboard';
 import { Routes, Route } from 'react-router-dom';
 import Form from "./widgets/Form";
 
-// const socket =
-//   io('https://whiteboard-server.up.railway.app/');
-// // io('localhost:4000/');
-const socket = new WebSocket('ws://localhost:4000'); // Use ws:// protocol
-
 function App() {
   const [user, setUser] = useState(null);
   useEffect(() => {
