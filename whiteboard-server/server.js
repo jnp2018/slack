@@ -9,9 +9,9 @@ const wss = new WebSocket.Server({ server })
 
 //only client has one of these origin will be able to establish connection to server
 const allowedOrigin = [
-  "https://collab-whiteboard.up.railway.app/",
-  "http://localhost:3000/",
-  "http://localhost:3001/"
+  "https://collab-whiteboard.up.railway.app",
+  "http://localhost:3000",
+  "http://localhost:3001"
 ]
 
 // Prepare for all drawing data saved
@@ -39,16 +39,18 @@ let peakClient = 0;
 //! Main --------------------------------------------
 wss.on('connection', (ws, req) => {
 
-  // Check if ws origin is allowed to connect
+  // TODO: handle origin auth
   if (!allowedOrigin.includes(req.headers.origin)) {
     wsSend(ws, 'originBlocked', {})
+    console.log('this origin is blocked :' +req.headers.origin)
     ws.close()
+  } else {
+    console.log('nice origin bro :' + req.headers.origin)
   }
 
   //TODO: handle name
   wsExtend(ws, generateUserId(), 'no name yet')
   console.log(ws.id, ws.name)
-
   currentClient += 1;
   peakClient = peakClient > currentClient ? peakClient : currentClient;
   console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
@@ -135,12 +137,12 @@ const clearCanvasHandler = (ws, data) => {
 const wsExtend = (ws, id, name) => {
   ws.id = id;
   ws.name = name;
-  ws.assignUserToRoom = (roomId) => {
+  ws.assignToRoom = (roomId) => {
     // Add user id to wb memo
     whiteboardList.find(wb => wb.id === roomId).users.push(ws.id)
   }
 
-  ws.removeUserFromRoom = (roomId) => {
+  ws.removeFromRoom = (roomId) => {
     // Remove user id from memo
     whiteboardList.find(wb => wb.id === roomId).users
       = whiteboardList.find(wb => wb.id === roomId).users.filter(user => user.id !== ws.id)
@@ -153,11 +155,11 @@ const wsExtend = (ws, id, name) => {
 //! Utilities --------------------------------------------
 
 const generateUserId = () => {
-  return crypto.randomBytes(16).toString('hex'); // Generates a 32-character hex string
+  return crypto.randomBytes(16).toString('hex'); // Generates a 32-character hex string e.g. 4674f88b025b4c0d0f90fac016bed637
 }
 
 const generateRoomId = () => {
-  return crypto.randomUUID(); // Generates a UUID v4-style ID
+  return crypto.randomUUID(); // Generates a UUID v4-style ID e.g. f0d82725-9cb9-43df-ae5e-c86c148db92d
 }
 
 //send the message to everyone currently connect to server
