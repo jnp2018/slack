@@ -3,14 +3,18 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import {BrowserRouter as Router} from "react-router-dom";
+import { BrowserRouter as Router } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'; 
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { WebSocketProvider } from './WebSocketContext'; // Import the WebSocketProvider
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <Router>
-  <App />
-</Router>
+  <WebSocketProvider> {/* Wrap WebSocketProvider here */}
+    <Router> {/* Wrap Router here */}
+      <App />
+    </Router>
+  </WebSocketProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
