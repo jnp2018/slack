@@ -1,9 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-const CreateRoomForm = ({ uuid, socket, setUser }) => {
+import { WebSocketContext } from '../WebSocketContext'; // Import the WebSocket context
+
+const CreateRoomForm = ({ setUser }) => {
    const [roomId, setRoomId] = useState("");
    const [userName, setUserName] = useState("");
    const navigate = useNavigate();
+   // const socket = useContext(WebSocketContext); // Access WebSocket from context
+   const { message, sendMessage } = useContext(WebSocketContext)
+
+   let roomCreateAcceptance = 'pending';
+   let roomJoinAcceptance = 'pending';
+   let roomCode = '';
+
    const handleCreateRoom = (e) => {
       e.preventDefault();
       const requestData = {
@@ -11,10 +20,6 @@ const CreateRoomForm = ({ uuid, socket, setUser }) => {
          // roomId
       };
       setUser(requestData);
-      let roomCreateAcceptance = 'pending';
-      let roomJoinAcceptance = 'pending';
-      let roomCode = '';
-
       console.log(requestData);
       /*
       * flow:
@@ -24,64 +29,54 @@ const CreateRoomForm = ({ uuid, socket, setUser }) => {
          - server try to put user in that room
          - if succeed, it send acceptance
       */
-      socket.send(JSON.stringify({ tag: 'createRoomRequest', data: requestData }))
-      socket.onmessage('message', (message) => {
+      // socket.send(JSON.stringify({ tag: 'createRoomRequest', data: requestData }))
+      sendMessage('createRoomRequest', requestData)
+   }
+   useEffect(() => {
+      if (!message) {
+         console.log('no message')
+         return
+      }
+      console.log(`Received message =>_${message}_<=`);
+      // message = JSON.parse(message)
+      console.log(message)
 
-         message = JSON.parse(message)
-         console.log(message)
+      switch (message.tag) {
+         case 'createRoomRequestAccepted':
+            roomCreateAcceptance = 'accepted';
+            break;
+         case 'createRoomRequestRejected':
+            roomCreateAcceptance = 'rejected';
+            break;
+         case 'userJoinRoomRequestAccepted':
+            // Should always be accepted
+            roomJoinAcceptance = 'accepted';
+            break;
+         case 'userJoinRoomRequestRejected':
+            roomJoinAcceptance = 'rejected';
+            break;
+         default:
+            // Optional: Handle unexpected tags
+            console.log('Unknown message tag:', message.tag);
+            break;
+      }
 
-         switch (message.tag) {
-            case 'createRoomRequestAccepted':
-               roomCreateAcceptance = 'accepted';
-               break;
-
-            case 'createRoomRequestRejected':
-               roomCreateAcceptance = 'rejected';
-               break;
-
-            case 'userJoinRoomRequestAccepted':
-               // Should always be accepted
-               roomJoinAcceptance = 'accepted';
-               break;
-
-            case 'userJoinRoomRequestRejected':
-               roomJoinAcceptance = 'rejected';
-               break;
-
-            default:
-               // Optional: Handle unexpected tags
-               console.log('Unknown message tag:', message.tag);
-               break;
-         }
-         
-         console.log({
-            roomCreateAcceptance: roomCreateAcceptance,
-            roomJoinAcceptance: roomJoinAcceptance,
-            roomCode: roomCode
-         })
-
-         roomCode = message.data?.roomId || '';
-         if (roomCreateAcceptance === 'rejected') {
-            alert(`Cannot create room`)
-         } else if (roomJoinAcceptance === 'rejected') {
-            alert(`Join Request Not Accepted`)
-         } else if (roomCreateAcceptance === 'accepted' && roomJoinAcceptance === 'accepted') {
-            navigate(`/${roomCode}`);
-         }
+      console.log({
+         roomCreateAcceptance: roomCreateAcceptance,
+         roomJoinAcceptance: roomJoinAcceptance,
+         roomCode: roomCode
       })
 
-
-   }
-   // function copyText() {
-   //    const roomIdElement = document.getElementById('roomId'); // Lấy phần tử input có id "roomId"
-   //    if (roomIdElement) {
-   //       const textToCopy = roomIdElement.value; // Lấy giá trị của input
-
-   //       if (textToCopy) {
-   //          navigator.clipboard.writeText(textToCopy);
-   //       }
-   //    }
-   // }
+      roomCode = message.data?.roomId || '';
+      if (roomCreateAcceptance === 'rejected') {
+         alert(`Cannot create room`)
+      } else if (roomJoinAcceptance === 'rejected') {
+         alert(`Join Request Not Accepted`)
+      } else if (roomCreateAcceptance === 'accepted' && roomJoinAcceptance === 'accepted') {
+         navigate(`/${roomCode}`);
+      }
+   })
+   
    return (
       <form className="form col-md-12 mt-5">
          <div className="form-group">
