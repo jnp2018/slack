@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { WebSocketContext } from '../WebSocketContext'; // Import the WebSocket context
+
 const JoinRoomForm = ({ setUser }) => {
   const [roomId, setRoomId] = useState("");
   const [userName, setUserName] = useState("");

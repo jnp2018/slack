@@ -1,6 +1,5 @@
 // src/widgets/Whiteboard.jsx
 import React, { useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
 import ToolBar from './ToolBar';
 import { draw, drawPolyline } from '../utils/DrawingUtils';
 import './Whiteboard.css';

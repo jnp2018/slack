@@ -5,7 +5,7 @@ import './Form.css';
 import JoinRoomForm from "./JoinForm";
 
 const Form = ({ setUser }) => {
-  const socket = useContext(WebSocketContext); // Access the WebSocket instance from context
+  const socket = useContext(WebSocketContext); //? Access the WebSocket instance from context
   return (
     <div className="row h-100 pt-5">
       <div className="col-md-4 mt-5 form-box p-5 border border-primary rounded-2 mx-auto d-flex flex-column align-items-center">

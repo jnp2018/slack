@@ -5,7 +5,7 @@ import Form from "./widgets/Form";
 import { WebSocketContext } from './WebSocketContext'; // Import WebSocket context
 
 function App() {
-  const socket = useContext(WebSocketContext); // Use WebSocket from context
+  const socket = useContext(WebSocketContext); //? Use WebSocket from context
   const [user, setUser] = useState(null);
 
   useEffect(() => {
