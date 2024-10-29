@@ -22,8 +22,8 @@ export const WebSocketProvider = ({ children }) => {
 
     socket.onmessage = (event) => {
       //TODO: need test
-      const parsedMessage = JSON.parse(event.data);
-      setMessage(parsedMessage); // Update message state on each new message
+      // const parsedMessage = JSON.parse(event.data);
+      setMessage(event); // Update message state on each new message
     };
 
     socket.onopen = () => console.log('Connected to WebSocket server');
@@ -34,7 +34,14 @@ export const WebSocketProvider = ({ children }) => {
 
   const sendMessage = (tag, data) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ tag, data }));
+      try {
+        socket.send(JSON.stringify({ tag, data }));
+        console.log("Message sent:", { tag, data });
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
+    } else {
+      console.warn("Cannot send message, WebSocket is not open.");
     }
   };
 
