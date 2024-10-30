@@ -169,7 +169,7 @@ const drawingHandler = (ws, data) => {
 
 const clearCanvasHandler = (ws, data) => {
   // Clear the whiteboard data
-  whiteboardData = [];
+  whiteboardList.find(whiteboard=>whiteboard.id==ws.roomId).whiteboardData=[]
   broadcast(ws, 'clearCanvas', data)
 }
 //! WebSocket extender --------------------------------------------
