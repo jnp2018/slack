@@ -37,6 +37,7 @@ const CreateRoomForm = ({ setUser }) => {
          console.log('no message')
          return
       }
+
      console.log(`Received message =>_${message}_<=`);
      const parseMessage = JSON.parse(message)
 
@@ -48,13 +49,13 @@ const CreateRoomForm = ({ setUser }) => {
             roomCreateAcceptance = 'accepted';
             roomJoinAcceptance = 'accepted';
             roomCode = parseMessage.data.roomId;
+
             break;
          default:
             // Optional: Handle unexpected tags
             console.log('Unknown message tag:', message.tag);
             break;
       }
-      
 
       console.log({
          roomCreateAcceptance: roomCreateAcceptance,
@@ -67,10 +68,10 @@ const CreateRoomForm = ({ setUser }) => {
       } else if (roomJoinAcceptance === 'rejected') {
          alert(`Join Request Not Accepted`)
       } else if (roomCreateAcceptance === 'accepted' && roomJoinAcceptance === 'accepted') {
-        
          navigate(`/${roomCode}`);
       }
    },[message])
+
    
    return (
       <form className="form col-md-12 mt-5">

@@ -1,3 +1,4 @@
+// src/widgets/Whiteboard.jsx
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import ToolBar from './ToolBar';
 import { draw, drawPolyline } from '../utils/DrawingUtils';

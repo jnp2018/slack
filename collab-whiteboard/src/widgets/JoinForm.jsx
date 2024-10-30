@@ -31,7 +31,7 @@ const JoinRoomForm = ({ setUser }) => {
         return;
     }
 
-    console.log(`Received message: ${message}`);
+    console.log(`Received message =>_${message}_<=`);
     
     let parsedMessage;
     try {
@@ -62,8 +62,7 @@ const JoinRoomForm = ({ setUser }) => {
     } else if (roomJoinAcceptance === 'accepted') {
         navigate(`/${roomId}`);
     }
-}, [message]);
-
+}, [message]); // Effect update on message change
 
   return (
     <form className="form col-md-12 mt-5">
