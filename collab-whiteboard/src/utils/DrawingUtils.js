@@ -1,5 +1,4 @@
 // utils/DrawingUtils.js
-
 // Draw a line from point x0y0 to x1y1
 export const draw = (context, x0, y0, x1, y1, color, lineWidth) => {
   context.beginPath();
@@ -12,7 +11,7 @@ export const draw = (context, x0, y0, x1, y1, color, lineWidth) => {
   context.closePath();
 };
 
-export const drawPolyline = (e, canvasRef, isDrawing, color, lineWidth, socket, lastPos, setLastPos) => {
+export const drawPolyline = (e, canvasRef, isDrawing, color, lineWidth,sendMessage, lastPos, setLastPos) => {
   if (!isDrawing) return;
 
   const canvas = canvasRef.current;
@@ -35,7 +34,7 @@ export const drawPolyline = (e, canvasRef, isDrawing, color, lineWidth, socket, 
     draw(context, lastPos.x, lastPos.y, x, y, color, lineWidth);
 
     // Emit the drawing data with the previous position
-    socket.emit('drawing', {
+    sendMessage('drawing', {
       x0: lastPos.x,
       y0: lastPos.y,
       x1: x,

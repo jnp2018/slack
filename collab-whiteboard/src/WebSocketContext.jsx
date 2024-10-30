@@ -23,7 +23,9 @@ export const WebSocketProvider = ({ children }) => {
     socket.onmessage = (event) => {
       //TODO: need test
       // const parsedMessage = JSON.parse(event.data);
-      setMessage(event); // Update message state on each new message
+      console.log(event);
+      setMessage(event.data); // Update message state on each new message
+      console.log(event.tag)
     };
 
     socket.onopen = () => console.log('Connected to WebSocket server');

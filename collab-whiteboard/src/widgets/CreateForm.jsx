@@ -16,8 +16,8 @@ const CreateRoomForm = ({ setUser }) => {
    const handleCreateRoom = (e) => {
       e.preventDefault();
       const requestData = {
-         userName
-         // roomId
+         userName,
+          roomId
       };
       setUser(requestData);
       console.log(requestData);
@@ -37,29 +37,24 @@ const CreateRoomForm = ({ setUser }) => {
          console.log('no message')
          return
       }
-      console.log(`Received message =>_${message}_<=`);
-      // message = JSON.parse(message)
-      console.log(message)
+     console.log(`Received message =>_${message}_<=`);
+     const parseMessage = JSON.parse(message)
 
-      switch (message.tag) {
-         case 'createRoomRequestAccepted':
+      console.log(message)
+      console.log(parseMessage.tag)
+     
+      switch (parseMessage.tag) {
+         case 'createRoomAndJoinRequestAccepted':
             roomCreateAcceptance = 'accepted';
-            break;
-         case 'createRoomRequestRejected':
-            roomCreateAcceptance = 'rejected';
-            break;
-         case 'userJoinRoomRequestAccepted':
-            // Should always be accepted
             roomJoinAcceptance = 'accepted';
-            break;
-         case 'userJoinRoomRequestRejected':
-            roomJoinAcceptance = 'rejected';
+            roomCode = parseMessage.data.roomId;
             break;
          default:
             // Optional: Handle unexpected tags
             console.log('Unknown message tag:', message.tag);
             break;
       }
+      
 
       console.log({
          roomCreateAcceptance: roomCreateAcceptance,
@@ -67,15 +62,15 @@ const CreateRoomForm = ({ setUser }) => {
          roomCode: roomCode
       })
 
-      roomCode = message.data?.roomId || '';
       if (roomCreateAcceptance === 'rejected') {
          alert(`Cannot create room`)
       } else if (roomJoinAcceptance === 'rejected') {
          alert(`Join Request Not Accepted`)
       } else if (roomCreateAcceptance === 'accepted' && roomJoinAcceptance === 'accepted') {
+        
          navigate(`/${roomCode}`);
       }
-   })
+   },[message])
    
    return (
       <form className="form col-md-12 mt-5">

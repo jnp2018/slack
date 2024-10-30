@@ -24,30 +24,46 @@ const JoinRoomForm = ({ setUser }) => {
     // socket.send(JSON.stringify({ tag: 'userJoinRoomRequest', data: requestData }))
   }
   useEffect(() => {
+    console.log("Executing useEffect...");
+
     if (!message) {
-      console.log('no message')
-      return
+        console.log('No message received');
+        return;
     }
-    console.log(`Received message =>_${message}_<=`);
-    if (message.tag == 'roomFound') roomFound = 'found';
-    if (message.tag == 'roomNotFound') roomFound = 'notFound';
 
-    if (message.tag == 'userJoinRoomRequestAccepted') roomJoinAcceptance = 'accepted';
-    if (message.tag == 'userJoinRoomRequestRejected') roomJoinAcceptance = 'rejected';
-
-    console.log({
-      roomJoinAcceptance: roomJoinAcceptance,
-      roomFound: roomFound
-    })
-
-    if (roomFound === 'notFound') {
-      alert(`Room ${roomId} not found`)
-    } else if (roomJoinAcceptance === 'rejected') {
-      alert(`Join Request Not Accepted`)
-    } else if (roomFound === 'found' && roomJoinAcceptance === 'accepted') {
-      navigate(`/${roomId}`);
+    console.log(`Received message: ${message}`);
+    
+    let parsedMessage;
+    try {
+        parsedMessage = JSON.parse(message);
+        console.log('Parsed message:', parsedMessage);
+    } catch (error) {
+        console.error('Failed to parse message:', error);
+        return;
     }
-  }, [message]) // Effect update on message change
+
+    let roomJoinAcceptance;
+    switch (parsedMessage.tag) {
+        case 'roomNotFound':
+            roomJoinAcceptance = 'rejected';
+            break;
+        case 'userJoinRoomRequestAccepted':
+            roomJoinAcceptance = 'accepted';
+            break;
+        default:
+            console.warn('Unhandled message tag:', parsedMessage.tag);
+            return;
+    }
+
+    console.log({ roomJoinAcceptance });
+
+    if (roomJoinAcceptance === 'rejected') {
+        alert('Join Request Not Accepted');
+    } else if (roomJoinAcceptance === 'accepted') {
+        navigate(`/${roomId}`);
+    }
+}, [message]);
+
 
   return (
     <form className="form col-md-12 mt-5">
