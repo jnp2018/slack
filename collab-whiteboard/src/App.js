@@ -1,35 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Whiteboard from './widgets/Whiteboard';
 import { Routes, Route } from 'react-router-dom';
 import Form from "./widgets/Form";
-import io from 'socket.io-client';
-const socket =
-  io('https://whiteboard-server.up.railway.app/');
-// io('localhost:4000/');
+import { WebSocketContext } from './WebSocketContext'; // Import WebSocket context
+
 function App() {
+  const socket = useContext(WebSocketContext); //? Use WebSocket from context
   const [user, setUser] = useState(null);
+
   useEffect(() => {
-    socket.on("userIsJoined", (data) => {
-      if (data.success) {
-        console.log("userJoined");
-      }
-      else console.log("userJoined error");
-    });
-  }, []);
-  const uuid = () => {
-    let S4 = () => {
-      return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    };
-    return (
-      S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4()
-    );
-  };
+    if (socket) {
+      socket.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        console.log('Received from server:', msg);
+
+        // Handle specific messages
+        if (msg.tag === 'userJoinRoomRequestAccepted') {
+          console.log('userJoinRoomRequestAccepted');
+        } else if (msg.tag === 'userJoinRoomRequestRejected') {
+          console.log('userJoinRoomRequestRejected');
+        }
+      };
+    }
+  }, [socket]);
+
   return (
     <div className='container'>
       <div className="container">
         <Routes>
-          <Route path="/" element={<Form uuid={uuid} socket={socket} setUser={setUser} ></Form>}></Route>
-          <Route path="/:roomId" element={<Whiteboard socket={socket}></Whiteboard>}></Route>
+          <Route path="/" element={<Form setUser={setUser} />} />
+          <Route path="/:roomId" element={<Whiteboard />} />
         </Routes>
       </div>
     </div>
