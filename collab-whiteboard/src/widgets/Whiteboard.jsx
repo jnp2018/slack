@@ -12,6 +12,9 @@ function Whiteboard() {
     const [lineWidth, setLineWidth] = useState(2);
     const [lastPos, setLastPos] = useState(null); 
     const [tool, setTool] = useState('polyline');
+	 const [showEraserCursor, setShowEraserCursor] = useState(false);//activate button erase 
+	const [eraserPosition, setEraserPosition] = useState({ x: 0, y: 0 });//erase position 
+	const [eraserSize, setEraserSize] = useState(lineWidth * 5);
 
     // Lấy `message` và `sendMessage` từ WebSocketContext
     const { message, sendMessage } = useContext(WebSocketContext);
@@ -77,16 +80,29 @@ function Whiteboard() {
         setIsDrawing(false);
         setLastPos(null);
     };
-
+	const activateEraser = (e) => {
+      
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = e.clientX-rect.left;
+        const y = e.clientY -rect.top;
+        setTool('eraser');
+        setShowEraserCursor(true);
+        setEraserPosition({ x, y });
+    };// 
     const handleMouseMove = (e) => {
-        if (!isDrawing) return;
 
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-
+		if (tool === 'eraser') {
+			setEraserPosition({ x, y });
+			// Nếu không nhấn chuột thì chỉ di chuyển cục tẩy
+		} 
+		if (!isDrawing) {
+			return;
+		}
         if (tool === 'polyline') {
             drawPolyline(e, canvasRef, isDrawing, color, lineWidth,sendMessage, lastPos, setLastPos);
         }else if (tool === 'line') {
@@ -96,6 +112,9 @@ function Whiteboard() {
 		} else if (tool === 'circle') {
 			//TODO: drawCircle(context, lastPos?.x || x, lastPos?.y || y, x, y, color, lineWidth);
 		}
+		if(tool === 'eraser'){
+			drawPolyline(e, canvasRef, isDrawing, '#FFFFFF', lineWidth*5,sendMessage, lastPos, setLastPos);
+		}
 
         // Gửi dữ liệu vẽ tới server qua WebSocket
         sendMessage('drawing', {
@@ -103,8 +122,8 @@ function Whiteboard() {
             y0: lastPos?.y || y,
             x1: x,
             y1: y,
-            color: color,
-            lineWidth: lineWidth,
+			color: tool === 'eraser' ? '#FFFFFF' : color,
+			lineWidth: tool === 'eraser' ? lineWidth * 5 : lineWidth,
             tool: tool
         });
 
@@ -124,9 +143,16 @@ function Whiteboard() {
         <div className="whiteboard-container">
             <ToolBar
                 setColor={setColor}
-                setLineWidth={setLineWidth}
-                setTool={setTool}
+				setLineWidth={(newLineWidth) => {
+					setLineWidth(newLineWidth);
+					setEraserSize(newLineWidth * 5); // Cập nhật kích thước nút xóa khi thay đổi lineWidth
+				}}
+                setTool={(selectedTool) => {
+					setTool(selectedTool);
+					setShowEraserCursor(selectedTool === 'eraser');
+				}}
                 clearCanvas={clearCanvas}
+				activateEraser={activateEraser} 
             />
             <canvas
                 ref={canvasRef}
@@ -137,6 +163,34 @@ function Whiteboard() {
                 onMouseOut={stopDrawing}
                 onMouseMove={handleMouseMove}
             />
+			{showEraserCursor && (
+    (() => {
+		const canvas = canvasRef.current;
+		const rect = canvas.getBoundingClientRect();
+        const left = eraserPosition.x-eraserSize/2+0.65*rect.left ;
+        const top = eraserPosition.y - eraserSize/2+rect.top;
+        const width = eraserSize;
+
+        console.log("Eraser Style:", { eraserPosition});
+		console.log("Eraser Style:", {left, top, width });
+        return (
+            <div
+                className="eraser-cursor"
+                style={{
+                    left: left,
+                    top: top,
+                    width: width,
+                    height: width,
+                    borderRadius: '50%',
+                    position: 'absolute',
+                    backgroundColor: '#cccccc',
+                    pointerEvents: 'none',
+                }}
+            />
+        );
+    })()
+)}
+
         </div>
     );
 }

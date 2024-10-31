@@ -25,6 +25,7 @@ function ToolBar({ setColor, setLineWidth, setTool, clearCanvas }) {
       <button className="tool-button" onClick={() => setTool('polyline')}>
         Free Stroke
       </button>
+
       <button className="tool-button" onClick={() => setTool('line')}>
         Line
       </button>
@@ -33,6 +34,9 @@ function ToolBar({ setColor, setLineWidth, setTool, clearCanvas }) {
       </button>
       <button className="tool-button" onClick={() => setTool('circle')}>
         Circle
+      </button>
+      <button className='tool-button' onClick={(activateEraser) => setTool('eraser')}>
+        Eraser
       </button>
       {/* Add more buttons for different shapes if needed */}
 

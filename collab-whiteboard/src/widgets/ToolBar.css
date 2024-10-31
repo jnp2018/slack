@@ -59,3 +59,13 @@ input[type="range"] {
 .delete-button:hover {
   background-color: #c82333;
 }
+.whiteboard-container {
+  position: relative;
+}
+
+.eraser-cursor {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.7); /* Màu trắng mờ để trông giống cục tẩy */
+  border: 1px solid #ddd; /* Viền nhẹ để phân biệt cục tẩy */
+  pointer-events: none;   /* Để vòng tròn không cản trở thao tác chuột */
+}
