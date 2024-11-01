@@ -233,9 +233,10 @@ function Whiteboard() {
                 ref={previewCanvasRef}
                 style={{
                     position: 'absolute',
-                    //! rect.getBoun() did not init at app start, crash at room create (need review)
+                    //! rect.getBoundingRect() did not init at app start, crash at room create (need review)
                     top: canvasRef.current?.getBoundingClientRect().top || 0,
-                    opacity: canvasRef.current?.getBoundingClientRect().top ? '100%' : '50%',
+                    opacity: canvasRef.current?.getBoundingClientRect().top ? '100%' : '0%',
+                    border: 'none'
                 }}
                 width={800}
                 height={600}
