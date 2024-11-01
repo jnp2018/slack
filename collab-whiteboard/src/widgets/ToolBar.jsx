@@ -1,6 +1,6 @@
 // src/components/ToolBar.js
 import React from 'react';
-import './ToolBar.css';
+import '../widgets_css/ToolBar.css';
 
 function ToolBar({ setColor, setLineWidth, setTool, clearCanvas }) {
   return (

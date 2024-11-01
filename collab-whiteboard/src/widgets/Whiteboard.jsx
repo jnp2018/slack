@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import ToolBar from './ToolBar';
 import { draw, drawPolyline, drawLine, drawRectangle, drawCircle } from '../utils/DrawingUtils';
-import './Whiteboard.css';
+import '../widgets_css/Whiteboard.css';
 import { WebSocketContext } from '../WebSocketContext';
 
 function Whiteboard() {
