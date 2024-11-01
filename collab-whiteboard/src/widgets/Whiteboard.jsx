@@ -23,14 +23,12 @@ function Whiteboard() {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-
         const context = canvas.getContext('2d');
 
         // Kiểm tra nếu có tin nhắn mới
         if (!message) return;
 
         // Chuyển đổi dữ liệu nếu cần
-
         const parseMessage = JSON.parse(message)
         console.log(parseMessage.tag)
         console.log(parseMessage.data)
@@ -52,11 +50,11 @@ function Whiteboard() {
                     drawData.lineWidth
                 )
             });
-
         } else if (parseMessage.tag === 'clearCanvas') {
             context.clearRect(0, 0, canvas.width, canvas.height);
         }
     }, [message]);
+    
     const onDrawingEvent = (shape) => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
@@ -72,6 +70,7 @@ function Whiteboard() {
         console.log(tool);
 
     };
+
     const startDrawing = (e) => {
         const rect = canvasRef.current.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -111,6 +110,7 @@ function Whiteboard() {
         // });
         //  setLastPos(null);
     };
+
     const activateEraser = (e) => {
         const rect = canvasRef.current.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -224,7 +224,11 @@ function Whiteboard() {
                 ref={canvasRef}
                 width={800}
                 height={600}
-                onMouseDown={startDrawing}
+                onMouseDown={(e) => {
+                    if (e.button === 0) { // Only start drawing if LMB is pressed
+                        startDrawing(e);
+                    }
+                }}
                 onMouseUp={stopDrawing}
                 onMouseOut={stopDrawing}
                 onMouseMove={handleMouseMove}
@@ -240,7 +244,11 @@ function Whiteboard() {
                 }}
                 width={800}
                 height={600}
-                onMouseDown={startDrawing}
+                onMouseDown={(e) => {
+                    if (e.button === 0) { // Only start drawing if LMB is pressed
+                        startDrawing(e);
+                    }
+                }}
                 onMouseUp={(e) => {
                     stopDrawing(e)
                     clearPreviewCanvas()
