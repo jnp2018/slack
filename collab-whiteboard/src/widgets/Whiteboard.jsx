@@ -38,8 +38,9 @@ function Whiteboard() {
         if (parseMessage.tag === 'drawing') {
             draw(context, parseMessage.data.x0, parseMessage.data.y0, parseMessage.data.x1, parseMessage.data.y1, parseMessage.data.color, parseMessage.data.lineWidth); // Gọi hàm `draw` để vẽ
         } else if (parseMessage.tag === 'history') {
-            // Lặp qua danh sách shapes và vẽ từng shape lên canvas
+            // Get and recreate whiteboard
 
+            // Lặp qua danh sách shapes và vẽ từng shape lên canvas
             parseMessage.data.forEach((drawData) => {
                 draw(
                     context,
@@ -190,7 +191,13 @@ function Whiteboard() {
     };
 
     return (
-        <div className="whiteboard-container" style={{ overflow: "hidden" }}>
+        <div
+            className="whiteboard-container"
+            style={{
+                position: 'relative',
+                overflow: "hidden"
+            }}
+        >
             <ToolBar
                 setColor={setColor}
                 setLineWidth={(newLineWidth) => {
@@ -204,7 +211,10 @@ function Whiteboard() {
                 clearCanvas={clearCanvas}
                 activateEraser={activateEraser}
             />
-            <canvas id="canva" style={{ overflow: "hidden" }}
+            <canvas id="canvas" style={{
+                overflow: "hidden",
+                display: "inline"
+            }}
                 ref={canvasRef}
                 width={800}
                 height={600}
@@ -213,8 +223,13 @@ function Whiteboard() {
                 onMouseOut={stopDrawing}
                 onMouseMove={handleMouseMove}
             />
-            <canvas id="previewcanva"
+            <canvas id="previewCanvas"
                 ref={previewCanvasRef}
+                style={{
+                    position: 'absolute',
+                    top: canvasRef.current.getBoundingClientRect().top,
+                    // left: canvasRef.current.getBoundingClientRect().left
+                }}
                 width={800}
                 height={600}
                 onMouseDown={startDrawing}
