@@ -112,14 +112,13 @@ function Whiteboard() {
         //  setLastPos(null);
     };
     const activateEraser = (e) => {
-
         const rect = canvasRef.current.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         setTool('eraser');
         setShowEraserCursor(true);
         setEraserPosition({ x, y });
-    };// 
+    };
 
     const handleMouseMove = (e) => {
 
@@ -181,6 +180,16 @@ function Whiteboard() {
         setLastPos({ x, y });
     };
 
+    // Function to clear the preview canvas after mouse up
+    const clearPreviewCanvas = () => {
+        previewCanvasRef.current.getContext('2d')
+            .clearRect(
+                0, 0,
+                previewCanvasRef.current.width,
+                previewCanvasRef.current.height
+            )
+    }
+
     const clearCanvas = () => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
@@ -194,8 +203,7 @@ function Whiteboard() {
         <div
             className="whiteboard-container"
             style={{
-                position: 'relative',
-                overflow: "hidden"
+                position: 'relative'
             }}
         >
             <ToolBar
@@ -212,8 +220,6 @@ function Whiteboard() {
                 activateEraser={activateEraser}
             />
             <canvas id="canvas" style={{
-                overflow: "hidden",
-                display: "inline"
             }}
                 ref={canvasRef}
                 width={800}
@@ -227,13 +233,17 @@ function Whiteboard() {
                 ref={previewCanvasRef}
                 style={{
                     position: 'absolute',
-                    top: canvasRef.current.getBoundingClientRect().top,
-                    // left: canvasRef.current.getBoundingClientRect().left
+                    //! rect.getBoun() did not init at app start, crash at room create (need review)
+                    top: canvasRef.current?.getBoundingClientRect().top || 0,
+                    opacity: canvasRef.current?.getBoundingClientRect().top ? '100%' : '50%',
                 }}
                 width={800}
                 height={600}
                 onMouseDown={startDrawing}
-                onMouseUp={stopDrawing}
+                onMouseUp={(e) => {
+                    stopDrawing(e)
+                    clearPreviewCanvas()
+                }}
                 onMouseOut={stopDrawing}
                 onMouseMove={handleMouseMove}
             />
@@ -244,9 +254,8 @@ function Whiteboard() {
                     const left = eraserPosition.x - eraserSize / 2 + 0.65 * rect.left;
                     const top = eraserPosition.y - eraserSize / 2 + rect.top;
                     const width = eraserSize;
-
-                    console.log("Eraser Style:", { eraserPosition });
-                    console.log("Eraser Style:", { left, top, width });
+                    {/* console.log("Eraser Style:", { eraserPosition });
+                    console.log("Eraser Style:", { left, top, width }); */}
                     return (
                         <div
                             className="eraser-cursor"
@@ -257,7 +266,7 @@ function Whiteboard() {
                                 height: width,
                                 borderRadius: '50%',
                                 position: 'absolute',
-                                backgroundColor: '#cccccc',
+                                backgroundColor: '#cccccc60',
                                 pointerEvents: 'none',
                             }}
                         />
