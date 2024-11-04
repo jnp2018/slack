@@ -50,7 +50,7 @@ wss.on('connection', (ws, req) => {
   peakClient = peakClient > currentClient ? peakClient : currentClient;
   console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
 
-  
+
 
   ws.on('message', (message) => {
 
@@ -101,13 +101,13 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 //! Handlers --------------------------------------------
 
 const createRoomRequestHandler = (ws, data) => {
- 
+
   ({ userName, roomId } = data);
   ws.name = userName;
-  roomId=generateRoomId();
+  roomId = generateRoomId();
   if (true) {
     console.log('createRoomAndJoinRequestAccepted')
-    wsSend(ws, 'createRoomAndJoinRequestAccepted', {userName,roomId})
+    wsSend(ws, 'createRoomAndJoinRequestAccepted', { userName, roomId })
     whiteboardList.push({
       id: roomId,
       whiteboardData: [],
@@ -116,8 +116,8 @@ const createRoomRequestHandler = (ws, data) => {
       ]
     })
     console.log(`[ + ] Room created: ${roomId}`)
-    ws.roomId=roomId
-   // userJoinRoomRequestHandler(ws, { userId: ws.id, roomId: roomId }, true)
+    ws.roomId = roomId
+    // userJoinRoomRequestHandler(ws, { userId: ws.id, roomId: roomId }, true)
   } else {
     console.log('createRoomRequestRejected')
     ws.send2('createRoomRequestRejected', {})
@@ -129,21 +129,21 @@ const createRoomRequestHandler = (ws, data) => {
 const userJoinRoomRequestHandler = (ws, data, bypass = false) => {
   const { userName, roomId } = data;
   ws.name = userName;
-  if (whiteboardList.some(whiteboard=>whiteboard.id===roomId) || bypass) {
+  if (whiteboardList.some(whiteboard => whiteboard.id === roomId) || bypass) {
     //TODO: resolve request logic for accept/reject at handleUserJoinRequest
     // Default respond: always Accept
 
     console.log('userJoinRoomRequestAccepted')
-    wsSend(ws, 'userJoinRoomRequestAccepted', { userName,roomId })
+    wsSend(ws, 'userJoinRoomRequestAccepted', { userName, roomId })
     // whiteboardList.forEach(board=>{
     //   if(board.id==roomId) board.users.push({id:ws.id,name: ws.name});
     // })
     ws.assignToRoom(roomId);
     console.log(whiteboardList)
-    ws.roomId=roomId
+    ws.roomId = roomId
     // New client is sent whiteboard data for sync with others
-  // socket.emit('history', whiteboardData);
-  wsSend(ws, "history", whiteboardList.find(whiteboard=>whiteboard.id==ws.roomId).whiteboardData)
+    // socket.emit('history', whiteboardData);
+    wsSend(ws, "history", whiteboardList.find(whiteboard => whiteboard.id == ws.roomId).whiteboardData)
 
   } else {
     console.log('RoomNotFound')
@@ -154,22 +154,22 @@ const userJoinRoomRequestHandler = (ws, data, bypass = false) => {
 
 const drawingHandler = (ws, data) => {
   // Save the drawing data to the history
-  try{
-  whiteboardList.find(whiteboard=>whiteboard.id==ws.roomId).whiteboardData.push(data)
-  console.log(whiteboardList.find(whiteboard=>whiteboard.id==ws.roomId).whiteboardData.length)
-  broadcast(ws, 'drawing', data)
-  }catch(e){
+  try {
+    whiteboardList.find(whiteboard => whiteboard.id == ws.roomId).whiteboardData.push(data)
+    console.log(whiteboardList.find(whiteboard => whiteboard.id == ws.roomId).whiteboardData.length)
+    broadcast(ws, 'drawing', data)
+  } catch (e) {
     console.log(e)
   }
- // whiteboardList.find(whiteboard=>whiteboard.id===data.id)
+  // whiteboardList.find(whiteboard=>whiteboard.id===data.id)
   // Broadct the entire data object, including the points
 
-  
+
 }
 
 const clearCanvasHandler = (ws, data) => {
   // Clear the whiteboard data
-  whiteboardList.find(whiteboard=>whiteboard.id==ws.roomId).whiteboardData=[]
+  whiteboardList.find(whiteboard => whiteboard.id == ws.roomId).whiteboardData = []
   broadcast(ws, 'clearCanvas', data)
 }
 //! WebSocket extender --------------------------------------------
@@ -178,7 +178,7 @@ const wsExtend = (ws, id, name) => {
   ws.name = name;
   ws.assignToRoom = (roomId) => {
     // Add user id to wb memo
-    whiteboardList.find(wb => wb.id === roomId).users.push({id:ws.id, name: ws.name})
+    whiteboardList.find(wb => wb.id === roomId).users.push({ id: ws.id, name: ws.name })
   }
 
   ws.removeFromRoom = (roomId) => {
@@ -218,7 +218,7 @@ const generateRoomId = () => {
 const broadcast = (ws, tag, data) => {
   wss.clients.forEach((client) => {
     // if (client.readyState === OPEN) {
-      client.send(JSON.stringify({ tag: tag, data: data }));
+    client.send(JSON.stringify({ tag: tag, data: data }));
     // }
   });
 }
