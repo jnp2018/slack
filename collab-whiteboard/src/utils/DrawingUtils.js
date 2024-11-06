@@ -34,18 +34,19 @@ export const drawPolyline = (e, canvasRef, isDrawing, color, lineWidth,sendMessa
     draw(context, lastPos.x, lastPos.y, x, y, color, lineWidth);
 
     // Emit the drawing data with the previous position
-    sendMessage('drawing', {
-      x0: lastPos.x,
-      y0: lastPos.y,
-      x1: x,
-      y1: y,
-      color: color,
-      lineWidth: lineWidth
-    });
+    // sendMessage('drawing', {
+    //   type: 'poly??Segment',
+    //   x0: lastPos.x,
+    //   y0: lastPos.y,
+    //   x1: x,
+    //   y1: y,
+    //   color: color,
+    //   lineWidth: lineWidth
+    // });
   }
 
   // Update the last position to the current position
-  setLastPos({ x, y });
+  // setLastPos({ x, y });
 };
 // DrawingUtils.js
 

@@ -32,23 +32,121 @@ const whiteboardData=[];
     const parseMessage = JSON.parse(message)
     console.log(parseMessage.tag)
     console.log(parseMessage.data)
+
     // Xử lý các tin nhắn khác nhau dựa vào tag
     if (parseMessage.tag === 'drawing') {
-      draw(context, parseMessage.data.x0, parseMessage.data.y0, parseMessage.data.x1, parseMessage.data.y1, parseMessage.data.color, parseMessage.data.lineWidth); // Gọi hàm `draw` để vẽ
-    } else if (parseMessage.tag === 'history') {
-      // Get and recreate whiteboard
+      const drawData = parseMessage.data
+      switch (drawData.type) {
+        case 'polySegment':
+          draw(
+            context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            drawData.color,
+            drawData.lineWidth
+          )
+          break;
+        case 'eraseSegment':
+          draw(
+            context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            'white',
+            drawData.lineWidth
+          )
+          break;
+        case 'line':
+          drawLine(context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            drawData.color,
+            drawData.lineWidth)
+          break;
+        case 'rectangle':
+          drawRectangle(context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            drawData.color,
+            drawData.lineWidth)
+          break;
+        case 'circle':
+          drawCircle(context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            drawData.color,
+            drawData.lineWidth)
+          break;
+        default:
+          console.log('Unsupported shape type');
+      }
+    } else if (parseMessage.tag === 'history') { // Get and recreate whiteboard
 
       // Lặp qua danh sách shapes và vẽ từng shape lên canvas
       parseMessage.data.forEach((drawData) => {
-        draw(
-          context,
-          drawData.x0,
-          drawData.y0,
-          drawData.x1,
-          drawData.y1,
-          drawData.color,
-          drawData.lineWidth
-        )
+        switch (drawData.type) {
+          case 'polySegment':
+            draw(
+              context,
+              drawData.x0,
+              drawData.y0,
+              drawData.x1,
+              drawData.y1,
+              drawData.color,
+              drawData.lineWidth
+            )
+            break;
+          case 'eraseSegment':
+            draw(
+              context,
+              drawData.x0,
+              drawData.y0,
+              drawData.x1,
+              drawData.y1,
+              'white',
+              drawData.lineWidth * 10
+            )
+            break;
+          case 'line':
+            drawLine(context,
+              drawData.x0,
+              drawData.y0,
+              drawData.x1,
+              drawData.y1,
+              drawData.color,
+              drawData.lineWidth)
+            break;
+          case 'rectangle':
+            drawRectangle(context,
+              drawData.x0,
+              drawData.y0,
+              drawData.x1,
+              drawData.y1,
+              drawData.color,
+              drawData.lineWidth)
+            break;
+          case 'circle':
+            drawCircle(context,
+              drawData.x0,
+              drawData.y0,
+              drawData.x1,
+              drawData.y1,
+              drawData.color,
+              drawData.lineWidth)
+            break;
+          default:
+            console.log('Unsupported shape type');
+        }
+
       });
     } else if (parseMessage.tag === 'clearCanvas') {
       context.clearRect(0, 0, canvas.width, canvas.height);
@@ -109,10 +207,37 @@ const updateWhiteboard = (actions) => {
     
     if (tool === 'line') {
       drawLine(context, startPos.x, startPos.y, x, y, color, lineWidth);
+      sendMessage('drawing', {
+        type: 'line',
+        x0: startPos.x,
+        y0: startPos.y,
+        x1: x,
+        y1: y,
+        color: color,
+        lineWidth: lineWidth
+      });
     } else if (tool === 'rectangle') {
       drawRectangle(context, startPos.x, startPos.y, x, y, color, lineWidth);
+      sendMessage('drawing', {
+        type: 'rectangle',
+        x0: startPos.x,
+        y0: startPos.y,
+        x1: x,
+        y1: y,
+        color: color,
+        lineWidth: lineWidth
+      });
     } else if (tool === 'circle') {
       drawCircle(context, startPos.x, startPos.y, x, y, color, lineWidth);
+      sendMessage('drawing', {
+        type: 'circle',
+        x0: startPos.x,
+        y0: startPos.y,
+        x1: x,
+        y1: y,
+        color: color,
+        lineWidth: lineWidth
+      });
     }
     setIsDrawing(false);
 
@@ -158,12 +283,16 @@ const updateWhiteboard = (actions) => {
       return;
     }
 
+    //Part to handle preview
     const previewCanvas = previewCanvasRef.current;
     const previewContext = previewCanvas.getContext('2d');
     previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+    //? Part to actually draw ?
     if (tool === 'polyline') {
       drawPolyline(e, canvasRef, isDrawing, color, lineWidth, sendMessage, lastPos, setLastPos);
       sendMessage('drawing', {
+        type: 'polySegment',
         x0: lastPos?.x || x,
         y0: lastPos?.y || y,
         x1: x,
@@ -172,6 +301,7 @@ const updateWhiteboard = (actions) => {
         lineWidth: tool === 'eraser' ? lineWidth * 5 : lineWidth,
         tool: tool
       });
+      setLastPos({ x, y });
     } else if (tool === 'line') {
       drawLine(previewContext, startPos.x, startPos.y, x, y, color, lineWidth);
     } else if (tool === 'rectangle') {
@@ -182,6 +312,7 @@ const updateWhiteboard = (actions) => {
       drawPolyline(e, canvasRef, isDrawing, '#FFFFFF', lineWidth * 10, sendMessage, lastPos, setLastPos);
       //  Gửi dữ liệu vẽ tới server qua WebSocket
       sendMessage('drawing', {
+        type: 'eraseSegment',
         x0: lastPos?.x || x,
         y0: lastPos?.y || y,
         x1: x,
@@ -191,8 +322,24 @@ const updateWhiteboard = (actions) => {
         tool: tool
       });
     }
-    setLastPos({ x, y });
   };
+
+  const handleMouseDown = (e) => {
+    if (e.button === 0) { // Only start drawing if LMB is pressed
+      startDrawing(e);
+    } else {
+      stopDrawing(e)
+    }
+
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (tool !== 'polyline' && tool !== 'eraser') {
+      setLastPos({ x, y });
+      console.log(`last pos was set at mouse down at ${x} and ${y}`)
+    }
+  }
 
   // Function to clear the preview canvas after mouse up
   const clearPreviewCanvas = () => {
@@ -241,11 +388,7 @@ const updateWhiteboard = (actions) => {
         ref={canvasRef}
         width={800}
         height={600}
-        onMouseDown={(e) => {
-          if (e.button === 0) { // Only start drawing if LMB is pressed
-            startDrawing(e);
-          }
-        }}
+        onMouseDown={handleMouseDown}
         onMouseUp={stopDrawing}
         onMouseOut={stopDrawing}
         onMouseMove={handleMouseMove}
@@ -261,11 +404,7 @@ const updateWhiteboard = (actions) => {
         }}
         width={800}
         height={600}
-        onMouseDown={(e) => {
-          if (e.button === 0) { // Only start drawing if LMB is pressed
-            startDrawing(e);
-          }
-        }}
+        onMouseDown={handleMouseDown}
         onMouseUp={(e) => {
           stopDrawing(e)
           clearPreviewCanvas()
