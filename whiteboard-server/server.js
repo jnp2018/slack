@@ -92,6 +92,17 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     currentClient -= 1;
     console.log(`[ - ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
+     // Xóa người dùng khỏi phòng
+     if (ws.roomId) {
+      const room = whiteboardList.find(wb => wb.id === ws.roomId);
+      if (room) {
+          room.users = room.users.filter(user => user.id !== ws.id);
+          console.log(`User ${ws.id} left room ${ws.roomId}`);
+
+          // Gửi danh sách người dùng cập nhật tới tất cả người dùng còn lại trong phòng
+          broadcastUserList(ws.roomId);
+      }
+    }
   });
 });
 
@@ -117,6 +128,7 @@ const createRoomRequestHandler = (ws, data) => {
     })
     console.log(`[ + ] Room created: ${roomId}`)
     ws.roomId = roomId
+    broadcastUserList(ws.roomId);
     // userJoinRoomRequestHandler(ws, { userId: ws.id, roomId: roomId }, true)
   } else {
     console.log('createRoomRequestRejected')
@@ -144,7 +156,7 @@ const userJoinRoomRequestHandler = (ws, data, bypass = false) => {
     // New client is sent whiteboard data for sync with others
     // socket.emit('history', whiteboardData);
     wsSend(ws, "history", whiteboardList.find(whiteboard => whiteboard.id == ws.roomId).whiteboardData)
-
+    broadcastUserList(ws.roomId);
   } else {
     console.log('RoomNotFound')
     wsSend(ws, 'RoomNotFound', {})
@@ -186,6 +198,7 @@ const wsExtend = (ws, id, name) => {
     whiteboardList.find(wb => wb.id === roomId).users
       = whiteboardList.find(wb => wb.id === roomId).users.filter(user => user.id !== ws.id)
   }
+// Hàm broadcast để gửi danh sách người dùng hiện tại trong phòng
 
   //! Not tested
   ws.send2 = (tag, data) => {
@@ -205,7 +218,16 @@ const wsExtend = (ws, id, name) => {
 }
 
 //! Utilities --------------------------------------------
-
+const broadcastUserList = (roomId) => {
+  const room = whiteboardList.find(wb => wb.id === roomId);
+  const userList = room ? room.users.map(user => ({ id: user.id, name: user.name, roomId: roomId })) : [];
+  console.log("went here")
+  wss.clients.forEach(client => {
+    if (client.roomId === roomId) {
+      wsSend(client, 'updateUserList', { userList });
+    }
+  });
+};
 const generateUserId = () => {
   return crypto.randomBytes(16).toString('hex'); // Generates a 32-character hex string e.g. 4674f88b025b4c0d0f90fac016bed637
 }
