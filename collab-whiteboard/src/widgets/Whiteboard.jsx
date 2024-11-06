@@ -251,7 +251,7 @@ function Whiteboard() {
         (() => {
           const canvas = canvasRef.current;
           const rect = canvas.getBoundingClientRect();
-          const left = eraserPosition.x - eraserSize / 2 + 0.65 * rect.left;
+          const left = eraserPosition.x - eraserSize / 2 + 0.05 * rect.left;
           const top = eraserPosition.y - eraserSize / 2 + rect.top;
           const width = eraserSize;
           {/* console.log("Eraser Style:", { eraserPosition });
