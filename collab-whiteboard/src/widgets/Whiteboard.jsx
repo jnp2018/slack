@@ -17,7 +17,7 @@ function Whiteboard() {
   const [showEraserCursor, setShowEraserCursor] = useState(false);//activate button erase
   const [eraserPosition, setEraserPosition] = useState({ x: 0, y: 0 });//erase position
   const [eraserSize, setEraserSize] = useState(lineWidth * 5);
-
+const whiteboardData=[];
   // Lấy `message` và `sendMessage` từ WebSocketContext
   const { message, sendMessage } = useContext(WebSocketContext);
 
@@ -53,8 +53,24 @@ function Whiteboard() {
     } else if (parseMessage.tag === 'clearCanvas') {
       context.clearRect(0, 0, canvas.width, canvas.height);
     }
+    else if(parseMessage.tag === 'updateWhiteboard'){
+        //Xong cái này là oke
+        updateWhiteboard(parseMessage.data);
+    }
   }, [message]);
-
+// Hàm để vẽ lại canvas từ dữ liệu whiteboardData
+const updateWhiteboard = (actions) => {
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas trước khi vẽ lại
+    actions.forEach((action) => {
+        console.log(action);
+       
+     
+       //  draw(action);
+       draw(context, action.x0, action.y0, action.x1, action.y1, action.color, action.lineWidth);
+    });
+  };
   const onDrawingEvent = (shape) => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
@@ -90,7 +106,7 @@ function Whiteboard() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const context = canvasRef.current.getContext('2d');
-
+    
     if (tool === 'line') {
       drawLine(context, startPos.x, startPos.y, x, y, color, lineWidth);
     } else if (tool === 'rectangle') {
@@ -99,6 +115,7 @@ function Whiteboard() {
       drawCircle(context, startPos.x, startPos.y, x, y, color, lineWidth);
     }
     setIsDrawing(false);
+
     // sendMessage('drawing', {
     //     x0: startPos.x,
     //     y0: startPos.y,
@@ -110,7 +127,13 @@ function Whiteboard() {
     // });
     //  setLastPos(null);
   };
-
+  const undo = () => {
+    sendMessage('undo' );
+  };
+  const redo = () => {
+    sendMessage('redo');
+  };
+  
   const activateEraser = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -179,17 +202,18 @@ function Whiteboard() {
         previewCanvasRef.current.width,
         previewCanvasRef.current.height
       )
-  }
+      
+  };
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, canvas.width, canvas.height);
-
+  
     // Gửi yêu cầu xóa canvas tới server qua WebSocket
     sendMessage('clearCanvas', {});
   };
-
+ 
   return (
     <div
       className="whiteboard-container"
@@ -208,6 +232,8 @@ function Whiteboard() {
           setShowEraserCursor(selectedTool === 'eraser');
         }}
         clearCanvas={clearCanvas}
+        undo={undo}
+        redo={redo}
         activateEraser={activateEraser}
       />
       <canvas id="canvas" style={{

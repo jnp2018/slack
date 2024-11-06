@@ -13,7 +13,7 @@ const allowedOrigin = [
   "http://localhost:3000",
   "http://localhost:3001"
 ]
-
+const undoStack={};
 // Prepare for all drawing data saved
 let whiteboardList = [
   {
@@ -77,9 +77,11 @@ wss.on('connection', (ws, req) => {
         break;
       case 'undo':
         //TODO: undo handler
+        undoHandler(ws);
         break;
       case 'redo':
         //TODO: redo handler
+        redoHandler(ws);
         break;
       //TODO: add more case here
       default:
@@ -227,6 +229,31 @@ const broadcastUserList = (roomId) => {
       wsSend(client, 'updateUserList', { userList });
     }
   });
+};
+const undoHandler = (ws) => {
+  const room = whiteboardList.find(wb => wb.whiteboardData.length>1);
+  if (room && room.whiteboardData.length > 0) {
+      const lastAction = room.whiteboardData.pop();
+      console.log(room.whiteboardData.length);
+      // Đẩy hành động `undo` vào `undoStack`
+      if (!undoStack[roomId]) undoStack[roomId] = [];
+      undoStack[roomId].push(lastAction);
+
+      // Gửi cập nhật đến tất cả các client để xóa hành động cuối
+      broadcast(ws, 'updateWhiteboard', room.whiteboardData);
+  }
+};
+const redoHandler = (ws) => {
+  const room = whiteboardList.find(wb => wb.whiteboardData.length>1);
+  if (room && undoStack[roomId] && undoStack[roomId].length > 0) {
+      const lastUndoneAction = undoStack[roomId].pop();
+    
+      // Đẩy lại hành động `redo` vào `whiteboardData`
+      room.whiteboardData.push(lastUndoneAction);
+
+      // Gửi cập nhật đến tất cả các client để khôi phục hành động
+      broadcast(ws, 'updateWhiteboard', room.whiteboardData);
+  }
 };
 const generateUserId = () => {
   return crypto.randomBytes(16).toString('hex'); // Generates a 32-character hex string e.g. 4674f88b025b4c0d0f90fac016bed637

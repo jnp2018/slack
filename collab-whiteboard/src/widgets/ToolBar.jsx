@@ -2,7 +2,7 @@
 import React from 'react';
 import '../widgets_css/ToolBar.css';
 
-function ToolBar({ setColor, setLineWidth, setTool, clearCanvas }) {
+function ToolBar({ setColor, setLineWidth, setTool, clearCanvas, undo, redo }) {
   return (
     <div className="toolbar">
       {/* Color picker */}
@@ -37,6 +37,12 @@ function ToolBar({ setColor, setLineWidth, setTool, clearCanvas }) {
       </button>
       <button className='tool-button' onClick={(activateEraser) => setTool('eraser')}>
         Eraser
+      </button>
+      <button className="tool-button" onClick={undo}>
+        Undo
+      </button>
+      <button className="tool-button" onClick={redo}>
+        Redo
       </button>
       {/* Add more buttons for different shapes if needed */}
 
