@@ -17,7 +17,7 @@ function Whiteboard() {
   const [showEraserCursor, setShowEraserCursor] = useState(false);//activate button erase
   const [eraserPosition, setEraserPosition] = useState({ x: 0, y: 0 });//erase position
   const [eraserSize, setEraserSize] = useState(lineWidth * 5);
-const whiteboardData=[];
+  const whiteboardData = [];
   // Lấy `message` và `sendMessage` từ WebSocketContext
   const { message, sendMessage } = useContext(WebSocketContext);
 
@@ -151,22 +151,70 @@ const whiteboardData=[];
     } else if (parseMessage.tag === 'clearCanvas') {
       context.clearRect(0, 0, canvas.width, canvas.height);
     }
-    else if(parseMessage.tag === 'updateWhiteboard'){
-        //Xong cái này là oke
-        updateWhiteboard(parseMessage.data);
+    else if (parseMessage.tag === 'updateWhiteboard') {
+      //Xong cái này là oke
+      updateWhiteboard(parseMessage.data);
     }
   }, [message]);
-// Hàm để vẽ lại canvas từ dữ liệu whiteboardData
-const updateWhiteboard = (actions) => {
+  // Hàm để vẽ lại canvas từ dữ liệu whiteboardData
+  const updateWhiteboard = (actions) => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas trước khi vẽ lại
-    actions.forEach((action) => {
-        console.log(action);
-       
-     
-       //  draw(action);
-       draw(context, action.x0, action.y0, action.x1, action.y1, action.color, action.lineWidth);
+    actions.forEach((drawData) => {
+      switch (drawData.type) {
+        case 'polySegment':
+          draw(
+            context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            drawData.color,
+            drawData.lineWidth
+          )
+          break;
+        case 'eraseSegment':
+          draw(
+            context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            'white',
+            drawData.lineWidth * 10
+          )
+          break;
+        case 'line':
+          drawLine(context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            drawData.color,
+            drawData.lineWidth)
+          break;
+        case 'rectangle':
+          drawRectangle(context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            drawData.color,
+            drawData.lineWidth)
+          break;
+        case 'circle':
+          drawCircle(context,
+            drawData.x0,
+            drawData.y0,
+            drawData.x1,
+            drawData.y1,
+            drawData.color,
+            drawData.lineWidth)
+          break;
+        default:
+          console.log('Unsupported shape type');
+      }
     });
   };
   const onDrawingEvent = (shape) => {
@@ -204,7 +252,7 @@ const updateWhiteboard = (actions) => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const context = canvasRef.current.getContext('2d');
-    
+
     if (tool === 'line') {
       drawLine(context, startPos.x, startPos.y, x, y, color, lineWidth);
       sendMessage('drawing', {
@@ -253,12 +301,12 @@ const updateWhiteboard = (actions) => {
     //  setLastPos(null);
   };
   const undo = () => {
-    sendMessage('undo' );
+    sendMessage('undo');
   };
   const redo = () => {
     sendMessage('redo');
   };
-  
+
   const activateEraser = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -349,18 +397,18 @@ const updateWhiteboard = (actions) => {
         previewCanvasRef.current.width,
         previewCanvasRef.current.height
       )
-      
+
   };
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, canvas.width, canvas.height);
-  
+
     // Gửi yêu cầu xóa canvas tới server qua WebSocket
     sendMessage('clearCanvas', {});
   };
- 
+
   return (
     <div
       className="whiteboard-container"
