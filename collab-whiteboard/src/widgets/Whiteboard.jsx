@@ -8,6 +8,9 @@ import { WebSocketContext } from '../WebSocketContext';
 function Whiteboard() {
   const canvasRef = useRef(null);
   const previewCanvasRef = useRef(null);
+  const overlayCanvasRef = useRef(null)// Canvas phụ để hiển thị tên
+  const overlayCanvas =overlayCanvasRef.current;
+    const overlayContext = overlayCanvas.getContext('2d');
   const [isDrawing, setIsDrawing] = useState(false);
   const [color, setColor] = useState('#000000');
   const [lineWidth, setLineWidth] = useState(2);
@@ -18,13 +21,14 @@ function Whiteboard() {
   const [eraserPosition, setEraserPosition] = useState({ x: 0, y: 0 });//erase position
   const [eraserSize, setEraserSize] = useState(lineWidth * 5);
   const whiteboardData = [];
+  const [userName, setUserName] =useState("");
   // Lấy `message` và `sendMessage` từ WebSocketContext
   const { message, sendMessage } = useContext(WebSocketContext);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-
+  
     // Kiểm tra nếu có tin nhắn mới
     if (!message) return;
 
@@ -32,7 +36,11 @@ function Whiteboard() {
     const parseMessage = JSON.parse(message)
     console.log(parseMessage.tag)
     console.log(parseMessage.data)
-
+    // Gan userName
+    if(parseMessage.tag==='updateUser'){
+      const name= parseMessage.data.name;
+      setUserName(name);
+    }
     // Xử lý các tin nhắn khác nhau dựa vào tag
     if (parseMessage.tag === 'drawing') {
       const drawData = parseMessage.data
@@ -47,6 +55,10 @@ function Whiteboard() {
             drawData.color,
             drawData.lineWidth
           )
+            overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Xóa tên cũ
+            overlayContext.fillStyle = '#e74c3c'; // Đặt màu của người vẽ
+            overlayContext.font = "14px Arial";
+            overlayContext.fillText(drawData.name, drawData.x1 + 5, drawData.y1 - 5); // Hiển thị tên gần vị trí chuột
           break;
         case 'eraseSegment':
           draw(
@@ -67,6 +79,10 @@ function Whiteboard() {
             drawData.y1,
             drawData.color,
             drawData.lineWidth)
+            overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Xóa tên cũ
+            overlayContext.fillStyle = '#e74c3c'; // Đặt màu của người vẽ
+            overlayContext.font = "14px Arial";
+            overlayContext.fillText(drawData.name, drawData.x1 + 5, drawData.y1 - 5); // Hiển thị tên gần vị trí chuột
           break;
         case 'rectangle':
           drawRectangle(context,
@@ -76,6 +92,10 @@ function Whiteboard() {
             drawData.y1,
             drawData.color,
             drawData.lineWidth)
+            overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Xóa tên cũ
+            overlayContext.fillStyle = '#e74c3c'; // Đặt màu của người vẽ
+            overlayContext.font = "14px Arial";
+            overlayContext.fillText(drawData.name, drawData.x1 + 5, drawData.y1 - 5); // Hiển thị tên gần vị trí chuột
           break;
         case 'circle':
           drawCircle(context,
@@ -85,6 +105,10 @@ function Whiteboard() {
             drawData.y1,
             drawData.color,
             drawData.lineWidth)
+            overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Xóa tên cũ
+            overlayContext.fillStyle = '#e74c3c'; // Đặt màu của người vẽ
+            overlayContext.font = "14px Arial";
+            overlayContext.fillText(drawData.name, drawData.x1 + 5, drawData.y1 - 5); // Hiển thị tên gần vị trí chuột
           break;
         default:
           console.log('Unsupported shape type');
@@ -156,10 +180,11 @@ function Whiteboard() {
       updateWhiteboard(parseMessage.data);
     }
   }, [message]);
-  // Hàm để vẽ lại canvas từ dữ liệu whiteboardData
+ 
   const updateWhiteboard = (actions) => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
+   
     context.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas trước khi vẽ lại
     actions.forEach((drawData) => {
       switch (drawData.type) {
@@ -247,6 +272,7 @@ function Whiteboard() {
   };
 
   const stopDrawing = (e) => {
+    overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Xóa tên cũ
     if (!isDrawing) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -262,7 +288,8 @@ function Whiteboard() {
         x1: x,
         y1: y,
         color: color,
-        lineWidth: lineWidth
+        lineWidth: lineWidth,
+        name: userName
       });
     } else if (tool === 'rectangle') {
       drawRectangle(context, startPos.x, startPos.y, x, y, color, lineWidth);
@@ -273,7 +300,8 @@ function Whiteboard() {
         x1: x,
         y1: y,
         color: color,
-        lineWidth: lineWidth
+        lineWidth: lineWidth,
+        name: userName
       });
     } else if (tool === 'circle') {
       drawCircle(context, startPos.x, startPos.y, x, y, color, lineWidth);
@@ -284,7 +312,8 @@ function Whiteboard() {
         x1: x,
         y1: y,
         color: color,
-        lineWidth: lineWidth
+        lineWidth: lineWidth,
+        name: userName
       });
     }
     setIsDrawing(false);
@@ -347,7 +376,8 @@ function Whiteboard() {
         y1: y,
         color: tool === 'eraser' ? '#FFFFFF' : color,
         lineWidth: tool === 'eraser' ? lineWidth * 5 : lineWidth,
-        tool: tool
+        tool: tool,
+        name:userName
       });
       setLastPos({ x, y });
     } else if (tool === 'line') {
@@ -367,7 +397,8 @@ function Whiteboard() {
         y1: y,
         color: tool === 'eraser' ? '#FFFFFF' : color,
         lineWidth: tool === 'eraser' ? lineWidth * 5 : lineWidth,
-        tool: tool
+        tool: tool,
+        name:userName
       });
     }
   };
@@ -460,11 +491,30 @@ function Whiteboard() {
         onMouseOut={stopDrawing}
         onMouseMove={handleMouseMove}
       />
+       <canvas id="overlayCanvas"
+        ref={overlayCanvasRef}
+        style={{
+          position: 'absolute',
+          //! rect.getBoundingRect() did not init at app start, crash at room create (need review)
+          top: canvasRef.current?.getBoundingClientRect().top || 0,
+          opacity: canvasRef.current?.getBoundingClientRect().top ? '100%' : '0%',
+          border: 'none'
+        }}
+        width={800}
+        height={600}
+        onMouseDown={handleMouseDown}
+        onMouseUp={(e) => {
+          stopDrawing(e)
+          clearPreviewCanvas()
+        }}
+        onMouseOut={stopDrawing}
+        onMouseMove={handleMouseMove}
+      />
       {showEraserCursor && (
         (() => {
           const canvas = canvasRef.current;
           const rect = canvas.getBoundingClientRect();
-          const left = eraserPosition.x - eraserSize / 2 + 0.05 * rect.left;
+          const left = eraserPosition.x - eraserSize / 2 + 0.15 * rect.left;
           const top = eraserPosition.y - eraserSize / 2 + rect.top;
           const width = eraserSize;
           {/* console.log("Eraser Style:", { eraserPosition });

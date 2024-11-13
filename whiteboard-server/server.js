@@ -131,6 +131,7 @@ const createRoomRequestHandler = (ws, data) => {
     console.log(`[ + ] Room created: ${roomId}`)
     ws.roomId = roomId
     broadcastUserList(ws.roomId);
+    broadcastUser(ws.roomId,ws.name);
     // userJoinRoomRequestHandler(ws, { userId: ws.id, roomId: roomId }, true)
   } else {
     console.log('createRoomRequestRejected')
@@ -159,6 +160,7 @@ const userJoinRoomRequestHandler = (ws, data, bypass = false) => {
     // socket.emit('history', whiteboardData);
     wsSend(ws, "history", whiteboardList.find(whiteboard => whiteboard.id == ws.roomId).whiteboardData)
     broadcastUserList(ws.roomId);
+    broadcastUser(ws.roomId,ws.name);
   } else {
     console.log('RoomNotFound')
     wsSend(ws, 'RoomNotFound', {})
@@ -220,6 +222,15 @@ const wsExtend = (ws, id, name) => {
 }
 
 //! Utilities --------------------------------------------
+const broadcastUser = (roomId, name) => {
+ 
+  console.log("went here")
+  wss.clients.forEach(client => {
+    if (client.name === name) {
+      wsSend(client, 'updateUser', { name });
+    }
+  });
+};
 const broadcastUserList = (roomId) => {
   const room = whiteboardList.find(wb => wb.id === roomId);
   const userList = room ? room.users.map(user => ({ id: user.id, name: user.name, roomId: roomId })) : [];
