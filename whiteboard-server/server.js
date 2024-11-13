@@ -50,7 +50,7 @@ wss.on('connection', (ws, req) => {
   peakClient = peakClient > currentClient ? peakClient : currentClient;
   console.log(`[ + ] Client. Current: ${currentClient}. Peak: ${peakClient}.`);
 
-  
+//TODO
 
   ws.on('message', (message) => {
 
